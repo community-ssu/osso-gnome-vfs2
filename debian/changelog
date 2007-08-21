@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-1osso25.1) unstable; urgency=low
+
+  * Fix building problem, add file compat to debian folder
+
+ -- Natalia Dobrovolskaya <natalia.dobrovolskaya@nokia.com>  Tue,  21 Aug 2007 12:34:00 +0100
+
 osso-gnome-vfs2 (2.16.3-1osso25) unstable; urgency=low
 
   * Fixes: NB#65141, GnomeVFS stops copy operation if even one of the source files

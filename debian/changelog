@@ -1,8 +1,8 @@
-osso-gnome-vfs2 (2.16.3-1osso26~unreleased) unstable; urgency=low
+osso-gnome-vfs2 (2.16.3-1osso26) unstable; urgency=low
 
   * Fixes: NB#66140, gnome-vfs http module leak
 	
- -- Martyn Russell <martyn@imendio.com>  Thu,  23 Aug 2007 17:00:00 +0100
+ -- Martyn Russell <martyn@imendio.com>  Thu, 23 Aug 2007 18:00:00 +0100
 
 osso-gnome-vfs2 (2.16.3-1osso25.1) unstable; urgency=low
 

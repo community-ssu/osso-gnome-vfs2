@@ -1,5 +1,7 @@
---- modules/http-proxy.c	2007-08-27 13:05:18.000000000 +0300
-+++ modules/http-proxy.c	2007-08-27 12:55:28.000000000 +0300
+Index: modules/http-proxy.c
+===================================================================
+--- modules/http-proxy.c	(revision 13435)
++++ modules/http-proxy.c	(working copy)
 @@ -52,7 +52,7 @@
  
  /* Global variables used by the HTTP proxy config */
@@ -9,7 +11,7 @@
  				 * and ensures serialization of authentication
  				 * hook callbacks       
  				 */
-@@ -247,7 +247,7 @@
+@@ -247,7 +247,7 @@ gboolean proxy_for_uri (GnomeVFSToplevel
  
      ret = proxy_should_for_hostname (toplevel_uri->host_name);
  
@@ -18,7 +20,7 @@
  
      if (ret && gl_http_proxy != NULL) {
  	ret = host_port_from_string(gl_http_proxy, &(proxy_info->host),
-@@ -263,7 +263,7 @@
+@@ -263,7 +263,7 @@ gboolean proxy_for_uri (GnomeVFSToplevel
  	ret = FALSE;
      }
  
@@ -27,7 +29,7 @@
  
      return ret;
  }
-@@ -499,7 +499,7 @@
+@@ -499,7 +499,7 @@ notify_gconf_value_changed(GConfClient *
  	|| strcmp(key, KEY_GCONF_HTTP_PROXY_PORT) == 0) {
  	gboolean use_proxy_value;
  
@@ -36,7 +38,7 @@
  
  	/* Check and see if we are using the proxy */
  	use_proxy_value =
-@@ -507,20 +507,20 @@
+@@ -507,20 +507,20 @@ notify_gconf_value_changed(GConfClient *
  				  KEY_GCONF_USE_HTTP_PROXY, NULL);
  	construct_gl_http_proxy(use_proxy_value);
  
@@ -60,12 +62,21 @@
      }
  }
  
-@@ -532,7 +532,6 @@
+@@ -530,8 +530,8 @@ void proxy_init(void)
+     gboolean use_proxy;
      gboolean use_proxy_auth;
  
++    G_LOCK(gl_mutex);
      gl_client = gconf_client_get_default();
 -    gl_mutex = g_mutex_new();
  
      gconf_client_add_dir(gl_client, PATH_GCONF_GNOME_VFS,
  			 GCONF_CLIENT_PRELOAD_ONELEVEL, &gconf_error);
-
+@@ -551,6 +551,7 @@ void proxy_init(void)
+ 	g_error_free(gconf_error);
+ 	gconf_error = NULL;
+     }
++    G_UNLOCK(gl_mutex);
+ 
+     /* Load the http proxy setting */
+     use_proxy =

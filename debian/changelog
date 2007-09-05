@@ -1,8 +1,14 @@
+osso-gnome-vfs2 (2.16.3-1osso28) unstable; urgency=low
+
+  * Rework the fix for NB#66755 to be correct.
+	
+ -- Richard Hult <richard@imendio.com>  Wed,  5 Sep 2007 09:02:14 +0200
+
 osso-gnome-vfs2 (2.16.3-1osso27) unstable; urgency=low
 
   * Fixes: NB#66755, proxy_init cb not getting called in time
 	
- -- Martyn Russell <martyn@imendio.com>  Tue, 28 Sep 2007 15:30:00 +0100
+ -- Martyn Russell <martyn@imendio.com>  Tue, 28 Aug 2007 15:30:00 +0100
 
 osso-gnome-vfs2 (2.16.3-1osso26) unstable; urgency=low
 

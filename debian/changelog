@@ -1,8 +1,9 @@
 osso-gnome-vfs2 (2.16.3-1osso28) unstable; urgency=low
 
   * Rework the fix for NB#66755 to be correct.
+  * Fixes: NB#58152, Paste operation is interrupted when some files are missing
 	
- -- Richard Hult <richard@imendio.com>  Wed,  5 Sep 2007 09:02:14 +0200
+ -- Richard Hult <richard@imendio.com>  Fri,  7 Sep 2007 09:24:54 +0200
 
 osso-gnome-vfs2 (2.16.3-1osso27) unstable; urgency=low
 

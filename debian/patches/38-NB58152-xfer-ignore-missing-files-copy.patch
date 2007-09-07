@@ -1,0 +1,44 @@
+Index: libgnomevfs/gnome-vfs-xfer.c
+===================================================================
+--- libgnomevfs/gnome-vfs-xfer.c	(revision 13606)
++++ libgnomevfs/gnome-vfs-xfer.c	(working copy)
+@@ -676,7 +676,11 @@ gnome_vfs_visit_list (const GList *name_
+ 				result = gnome_vfs_directory_visit_uri (uri, info_options, 
+ 					visit_options, callback, data);
+ 			}
++		} else if (result == GNOME_VFS_ERROR_NOT_FOUND) {
++			/* uri not found, do not treat as a real error */
++			result = GNOME_VFS_OK;
+ 		}
++
+ 		gnome_vfs_file_info_unref (info);
+ 		
+ 		if (result != GNOME_VFS_OK) {
+@@ -1766,8 +1770,6 @@ copy_items (const GList *source_uri_list
+ 		int count;
+ 		int progress_result;
+ 
+-		progress->progress_info->file_index++;
+-
+ 		skip = FALSE;
+ 		target_uri = NULL;
+ 
+@@ -1795,6 +1797,8 @@ copy_items (const GList *source_uri_list
+ 			}
+ 			result = GNOME_VFS_OK;
+ 
++			progress->progress_info->file_index++;
++
+ 			/* optionally keep trying until we hit a unique target name */
+ 			for (count = 1; ; count++) {
+ 				GnomeVFSXferOverwriteMode overwrite_mode_abort;
+@@ -1883,6 +1887,9 @@ copy_items (const GList *source_uri_list
+ 			}
+ 
+ 			gnome_vfs_file_info_unref (target_dir_info);
++		} else if (result == GNOME_VFS_ERROR_NOT_FOUND) {
++			/* source uri not found, do not treat as a real error */
++			result = GNOME_VFS_OK;
+ 		}
+ 
+ 		gnome_vfs_file_info_unref (info);

@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-1osso29) unstable; urgency=low
+
+  * Fixes: NB#22048, Extra threads left running after changing the background
+	
+ -- Richard Hult <richard@imendio.com>  Fri, 21 Sep 2007 09:24:54 +0200
+
 osso-gnome-vfs2 (2.16.3-1osso28) unstable; urgency=low
 
   * Rework the fix for NB#66755 to be correct.

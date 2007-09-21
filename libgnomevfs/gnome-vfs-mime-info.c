@@ -379,7 +379,7 @@ handle_mime_info (const char *filename, xmlTextReaderPtr reader)
 					entry->aliases = g_strdup (mime_type);
 				}
 				g_free (mime_type);
-					}
+			}
 		}
 		ret = read_next (reader);
 	}

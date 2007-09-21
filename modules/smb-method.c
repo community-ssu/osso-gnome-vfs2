@@ -155,7 +155,7 @@ static void auth_callback (const char *server_name, const char *share_name,
 		     	   char *domain, int domainmaxlen,
 		     	   char *username, int unmaxlen,
 		     	   char *password, int pwmaxlen);
-
+		     	   
 #if 0
 #define DEBUG_SMB_ENABLE
 #define DEBUG_SMB_LOCKS
@@ -1756,7 +1756,7 @@ do_create (GnomeVFSMethod *method,
 	handle->file = file;
 
 	*method_handle = (GnomeVFSMethodHandle *)handle;
-
+	
 	return GNOME_VFS_OK;
 }
 

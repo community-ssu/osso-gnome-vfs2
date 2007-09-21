@@ -220,7 +220,7 @@ gnome_vfs_get_mime_type_from_uri_internal (GnomeVFSURI *uri)
 	if (base_name == NULL) {
 		return NULL;
 	}
-	
+
 	mime_type = gnome_vfs_mime_type_from_name_or_default (base_name, NULL);
 	g_free (base_name);
 	return mime_type;

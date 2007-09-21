@@ -632,14 +632,14 @@ execute_operation (const gchar      *method,
 
 	dbus_message_unref (message);
 	
-		while (!dbus_pending_call_get_completed (pending_call) &&
-		       dbus_connection_read_write_dispatch (connection->connection, -1))
-			;
+	while (!dbus_pending_call_get_completed (pending_call) &&
+	       dbus_connection_read_write_dispatch (connection->connection, -1))
+		;
 
-			reply = dbus_pending_call_steal_reply (pending_call);
+	reply = dbus_pending_call_steal_reply (pending_call);
 
-		dbus_pending_call_unref (pending_call);
-
+	dbus_pending_call_unref (pending_call);
+	
 	if (cancellation_id != -1) {
 		cancellation_id_free (cancellation_id, context);
 	}

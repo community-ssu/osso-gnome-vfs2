@@ -2436,8 +2436,8 @@ gnome_vfs_xfer_uri_internal (const GList *source_uris,
 		 * file system, so we just forge ahead and hope for the best 
 		 */
 		target_dir_uri = gnome_vfs_uri_get_parent ((GnomeVFSURI *)target_uri_list->data);
-			result = gnome_vfs_get_volume_free_space (target_dir_uri, &free_bytes);
-		
+		result = gnome_vfs_get_volume_free_space (target_dir_uri, &free_bytes);
+
 		if (result == GNOME_VFS_OK) {
 			if (!move && !link && progress->progress_info->bytes_total > free_bytes) {
 				result = GNOME_VFS_ERROR_NO_SPACE;
@@ -2512,7 +2512,7 @@ gnome_vfs_xfer_uri_internal (const GList *source_uris,
 					 * Make sure we have space for the copies.
 					 */
 					target_dir_uri = gnome_vfs_uri_get_parent ((GnomeVFSURI *)merge_target_uri_list->data);
-						result = gnome_vfs_get_volume_free_space (target_dir_uri, &free_bytes);
+					result = gnome_vfs_get_volume_free_space (target_dir_uri, &free_bytes);
 					
 					if (result == GNOME_VFS_OK) {
 						if (progress->progress_info->bytes_total > free_bytes) {

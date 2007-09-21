@@ -3,7 +3,7 @@ osso-gnome-vfs2 (2.16.3-1osso29) unstable; urgency=low
   * Fixes: NB#22048, Extra threads left running after changing the background
   * Plug a small leak in the volume monitor (patch 39)
 	
- -- Martyn Russell <martyn@imendio.com>  Fri, 21 Sep 2007 17:34:00 +0100
+ -- Richard Hult <richard@imendio.com>  Fri, 21 Sep 2007 09:18:58 +0200
 
 osso-gnome-vfs2 (2.16.3-1osso28) unstable; urgency=low
 

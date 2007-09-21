@@ -1,8 +1,8 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
 /* gnome-vfs-job-queue.c - Job queue for asynchronous GnomeVFSJobs
-
+   
    Copyright (C) 2005 Christian Kellner
-
+   
    The Gnome Library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public License as
    published by the Free Software Foundation; either version 2 of the
@@ -58,14 +58,14 @@ thread_entry_point (gpointer data, gpointer user_data)
 		/* FIXME: doesn't that leak here? */
 		return;
 	}
-
+	
 	JOB_DEBUG (("locking job_lock %p", job->job_handle));
 	g_mutex_lock (job->job_lock);
 	_gnome_vfs_async_job_map_unlock ();
 
 	_gnome_vfs_job_execute (job);
 	complete = _gnome_vfs_job_complete (job);
-
+	
 	JOB_DEBUG (("Unlocking access lock %p", job->job_handle));
 	g_mutex_unlock (job->job_lock);
 
@@ -89,7 +89,7 @@ prioritize_threads (gconstpointer a,
 	int          prio_a;
 	int          prio_b;
 	int          retval;
-
+	
 	job_a = (GnomeVFSJob *) a;
 	job_b = (GnomeVFSJob *) b;
 
@@ -103,7 +103,7 @@ prioritize_threads (gconstpointer a,
 	 * second task should be processed first. 
 	 *
 	 */
-
+	
 	if (prio_a > prio_b) {
 		return -1;
 	} else if (prio_a < prio_b) {
@@ -120,7 +120,7 @@ prioritize_threads (gconstpointer a,
 	return retval;
 }
 
-void 
+void
 _gnome_vfs_job_queue_init (void)
 {
 	GError *err = NULL;
@@ -146,15 +146,15 @@ gboolean
 _gnome_vfs_job_schedule (GnomeVFSJob *job)
 {
 	GError *err = NULL;
-		
+	
 	if (G_UNLIKELY (gnome_vfs_quitting)) {
 		/* The application is quitting, the threadpool might already
 		 * be dead, just return FALSE 
 		 * We are also not calling _gnome_vfs_async_job_completed 
 		 * because the job map might also be dead */
 		g_warning ("Starting of GnomeVFS async calls after quit.");
-			return FALSE;
-		}
+		return FALSE;
+	}
 
 	g_thread_pool_push (thread_pool, job, &err);
 
@@ -164,11 +164,11 @@ _gnome_vfs_job_schedule (GnomeVFSJob *job)
 
 		/* thread did not start up, remove the job from the hash table */
 		_gnome_vfs_async_job_completed (job->job_handle);
-
+		
 		return FALSE;
 	}
 
-	return TRUE;
+	return TRUE;	
 }
 
 /**
@@ -212,7 +212,7 @@ _gnome_vfs_job_queue_shutdown (void)
 	gnome_vfs_quitting = TRUE;
 
 	while (gnome_vfs_job_get_count () != 0) {
-
+		
 		g_main_context_iteration (NULL, FALSE);
 		g_usleep (20000);
 

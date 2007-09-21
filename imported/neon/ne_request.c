@@ -789,14 +789,14 @@ static int read_response_block(ne_request *req, struct ne_response *resp,
             SOCK_ERR(req,
                      ne_sock_readline(sock, req->respbuf, sizeof req->respbuf),
                      _("Could not read chunk size"));
-		    NE_DEBUG(NE_DBG_HTTP, "[chunk] < %s", req->respbuf);
-		    chunk_len = strtoul(req->respbuf, &ptr, 16);
-		    /* limit chunk size to <= UINT_MAX, so it will probably
-		     * fit in a size_t. */
-		    if (ptr == req->respbuf || 
-			chunk_len == ULONG_MAX || chunk_len > UINT_MAX) {
-			    return aborted(req, _("Could not parse chunk size"), 0);
-		    }
+            NE_DEBUG(NE_DBG_HTTP, "[chunk] < %s", req->respbuf);
+            chunk_len = strtoul(req->respbuf, &ptr, 16);
+	    /* limit chunk size to <= UINT_MAX, so it will probably
+	     * fit in a size_t. */
+	    if (ptr == req->respbuf || 
+		chunk_len == ULONG_MAX || chunk_len > UINT_MAX) {
+		return aborted(req, _("Could not parse chunk size"), 0);
+	    }
 	    NE_DEBUG(NE_DBG_HTTP, "Got chunk size: %lu\n", chunk_len);
 	    resp->body.chunk.remain = chunk_len;
 	}
@@ -1332,7 +1332,7 @@ int ne_begin_request(ne_request *req)
     for (rdr = req->body_readers; rdr != NULL; rdr=rdr->next) {
 	rdr->use = rdr->accept_response(rdr->userdata, req, st);
     }
-
+    
     return NE_OK;
 }
 

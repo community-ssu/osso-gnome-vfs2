@@ -841,7 +841,7 @@ static char *
 make_volume_name_from_path_and_fs (const char *mount_path, const char *fs_type)
 {
 	const char *name;
-
+	
 	if (mount_path[0] == '/' && mount_path[1] == '\0') {
 		return g_strdup (_("Root Volume"));
 	}

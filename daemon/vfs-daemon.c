@@ -923,7 +923,7 @@ main (int argc, char *argv[])
 	}
 
 	setlocale(LC_ALL, "");
-
+	
 	g_type_init ();
 
 	gnome_vfs_set_is_daemon (GNOME_VFS_TYPE_VOLUME_MONITOR_DAEMON,

@@ -1917,12 +1917,12 @@ http_get_file_info (HttpContext *context, GnomeVFSFileInfo *info)
 	result = resolve_result (res, req);	
 	
 	if (result == GNOME_VFS_OK) {
-		const char *name;
+		const char *name;	
 		
 		name = gnome_vfs_uri_get_path (context->uri);
 	
 		gnome_vfs_file_info_clear (info);
-
+		
 		info->name  = g_path_get_basename (name);
 		info->type  = GNOME_VFS_FILE_TYPE_REGULAR;
 		info->flags = GNOME_VFS_FILE_FLAGS_NONE;

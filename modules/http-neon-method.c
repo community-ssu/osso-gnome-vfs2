@@ -1104,9 +1104,8 @@ std_headers_to_file_info (ne_request *req, GnomeVFSFileInfo *info)
 	
 	value  = ne_get_response_header (req, "Content-Type");
 
-	if (value != NULL) {
-		g_free (info->mime_type);
-
+	if (value != NULL && info->mime_type == NULL) {
+		g_print ("get from server: %s\n", value);
 		info->mime_type = strip_semicolon (value);
 		info->valid_fields |= GNOME_VFS_FILE_INFO_FIELDS_MIME_TYPE;
 	}
@@ -1505,7 +1504,8 @@ neon_return_headers (ne_request *req, void *userdata, const ne_status *status)
 					&in_args, sizeof (in_args),
 					&out_args, sizeof (out_args));
 	
-	/* FIXME: free stuff here?  */
+	g_list_foreach (headers, (GFunc) g_free, NULL);
+	g_list_free (headers);
 	
 	ne_set_request_private (req, "Headers Returned", "TRUE");
 	
@@ -1617,6 +1617,9 @@ http_acquire_connection (HttpContext *context)
 		return GNOME_VFS_ERROR_INTERNAL;
 	}
 
+	/* Set the timeout, filed as upstream bug #402851, NB#50018. */
+	ne_set_read_timeout (session, 30);
+	
 	user_agent = getenv (CUSTOM_USER_AGENT_VARIABLE);
 	   
 	if (user_agent == NULL) {
@@ -1819,6 +1822,54 @@ http_follow_redirect (HttpContext *context)
 /* ************************************************************************** */
 /* Http operations */
 
+static char *
+strip_query (const char *path)
+{
+	const char *tmp;
+
+	tmp = strchr (path, '?');
+	if (tmp == NULL) {
+		return g_strdup (path);
+	}
+
+	return g_strndup (path, tmp - path);
+}
+
+/* Sends a HEAD/GET request where we are not interested in any information
+ * except headers. Some broken servers send the content for HEAD requests, so we
+ * always try to read to get rid of that by closing the connection, and for the
+ * case where this is used with GET as fallback for HEAD, we are also not
+ * interested in the data.
+ */
+static int
+dispatch_head_request (ne_request *req)
+{
+	gboolean must_close = FALSE;
+	char buffer[1];
+	size_t len;
+	int res;
+	
+	do {
+		res = ne_begin_request (req);
+		
+		if (NE_OK == res) {
+			len = ne_read_response_block (req, buffer, sizeof buffer);
+			must_close = (len > 0);
+		}
+
+		if (NE_OK == res) {
+			res = ne_end_request (req);
+		}
+	} while (NE_RETRY == res);
+
+	if (must_close) {
+		DEBUG_HTTP ("explictly closing connection");
+		ne_close_connection (ne_get_session (req));
+	}
+
+	return res;
+}
+
 static GnomeVFSResult
 http_get_file_info (HttpContext *context, GnomeVFSFileInfo *info)
 {
@@ -1827,9 +1878,21 @@ http_get_file_info (HttpContext *context, GnomeVFSFileInfo *info)
 	ne_propfind_handler *pfh;
 	ne_request *req;
 	int res;
+	char *stripped;
+	const char *mime_type;
 
 	DEBUG_HTTP_CONTEXT (context);
 	
+	/* First try getting the local mime type just from the filename. See
+	 * NB#10173.
+	 */
+	stripped = strip_query (context->path);
+	mime_type = gnome_vfs_mime_type_from_name_or_default (stripped, NULL);
+	g_free (stripped);
+	if (mime_type && strcmp (mime_type, "application/octet-stream") == 0) {
+		mime_type = NULL;
+	}
+
 	/* no dav server */
 	if (context->dav_mode == FALSE || context->dav_class == NO_DAV) 
 		goto head_start;
@@ -1898,7 +1961,7 @@ http_get_file_info (HttpContext *context, GnomeVFSFileInfo *info)
  head_start:
 	req  = ne_request_create (context->session, "HEAD", context->path);
 
-	res = ne_request_dispatch (req);
+	res = dispatch_head_request (req);
 
 	if (res == NE_REDIRECT) {
 		ne_request_destroy (req);
@@ -1916,27 +1979,59 @@ http_get_file_info (HttpContext *context, GnomeVFSFileInfo *info)
 
 	result = resolve_result (res, req);	
 	
+	if (res == NE_ERROR || result == GNOME_VFS_ERROR_NOT_SUPPORTED) {
+		/* Assume that there was a broken server... fallback to GET. */
+		DEBUG_HTTP ("Fall back to GET request");
+		
+		ne_request_destroy (req);
+		req = NULL;
+
+		req = ne_request_create (context->session, "GET", context->path);
+		res = dispatch_head_request (req);
+
+		if (res == NE_REDIRECT) {
+			result = http_follow_redirect (context);		
+
+			ne_request_destroy (req);
+			req = NULL;
+		
+			if (result == GNOME_VFS_OK) {
+				goto head_start;
+			} else {
+				return result;
+			}
+		}
+
+		result = resolve_result (res, req);	
+	}
+	
 	if (result == GNOME_VFS_OK) {
-		const char *name;	
+		const char *name;
+		char *stripped;
 		
 		name = gnome_vfs_uri_get_path (context->uri);
 	
 		gnome_vfs_file_info_clear (info);
+
+		/* Keep any mime type we got from the filename above. */
+		if (mime_type) {
+			info->mime_type = g_strdup (mime_type);
+			info->valid_fields |= GNOME_VFS_FILE_INFO_FIELDS_MIME_TYPE;
+		}
+
+		/* Remove any "?foobar", that shouldn't be part of the name. See
+		 * NB#19530.
+		 */
+		stripped = strip_query (name);
+		info->name  = g_path_get_basename (stripped);
+		g_free (stripped);
 		
-		info->name  = g_path_get_basename (name);
 		info->type  = GNOME_VFS_FILE_TYPE_REGULAR;
 		info->flags = GNOME_VFS_FILE_FLAGS_NONE;
 		
 		info->valid_fields |= GNOME_VFS_FILE_INFO_FIELDS_TYPE;
 
 		std_headers_to_file_info (req, info);
-		
-		/* work-around for broken icecast server */
-		if (info->valid_fields & GNOME_VFS_FILE_INFO_FIELDS_MIME_TYPE
-		    && ! g_ascii_strcasecmp (info->mime_type, "audio/mpeg")) {
-			ne_close_connection (ne_get_session (req));
-		}
-		
 	}
 	
 	ne_request_destroy (req);

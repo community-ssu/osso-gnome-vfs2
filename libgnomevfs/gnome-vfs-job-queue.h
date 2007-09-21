@@ -28,8 +28,9 @@
 
 #include "gnome-vfs-job.h"
 
-void          _gnome_vfs_job_queue_init       (void) G_GNUC_INTERNAL;
-void          _gnome_vfs_job_queue_shutdown   (void) G_GNUC_INTERNAL;
-gboolean      _gnome_vfs_job_schedule         (GnomeVFSJob       *job) G_GNUC_INTERNAL;
+void          _gnome_vfs_job_queue_init       (void);
+void          _gnome_vfs_job_queue_shutdown   (void);
+gboolean      _gnome_vfs_job_schedule         (GnomeVFSJob       *job);
+void          _gnome_vfs_job_queue_run        (void);
 
 #endif /* GNOME_VFS_JOB_QUEUE_H */

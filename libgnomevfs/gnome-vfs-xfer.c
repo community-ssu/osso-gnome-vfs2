@@ -1359,6 +1359,9 @@ xfer_create_target (GnomeVFSHandle **target_handle,
 
 	exclusive = (*overwrite_mode != GNOME_VFS_XFER_OVERWRITE_MODE_REPLACE);
 
+	/* Maemo patch, added 20050905 */
+        call_progress (progress, GNOME_VFS_XFER_PHASE_OPENTARGET);
+
 	*skip = FALSE;
 	do {
 		retry = FALSE;
@@ -2202,6 +2205,10 @@ gnome_vfs_xfer_delete_items_common (const GList *source_uri_list,
 		}
 
 		gnome_vfs_file_info_unref (info);
+
+		if (result != GNOME_VFS_OK) {
+			break;
+		}
 	}
 
 	return result;
@@ -2407,6 +2414,12 @@ gnome_vfs_xfer_uri_internal (const GList *source_uris,
 			result = gnome_vfs_check_same_fs_uris ((GnomeVFSURI *)source_uri->data, 
 				target_dir_uri, &same_fs);
 
+			if (result == GNOME_VFS_ERROR_NOT_FOUND) {
+				/* Missing source files is not an error here. */
+				result = GNOME_VFS_OK;
+				continue;
+			}
+			
 			if (result != GNOME_VFS_OK) {
 				break;
 			}
@@ -2436,8 +2449,12 @@ gnome_vfs_xfer_uri_internal (const GList *source_uris,
 		 * file system, so we just forge ahead and hope for the best 
 		 */
 		target_dir_uri = gnome_vfs_uri_get_parent ((GnomeVFSURI *)target_uri_list->data);
-		result = gnome_vfs_get_volume_free_space (target_dir_uri, &free_bytes);
-
+		if (strcmp (gnome_vfs_uri_get_scheme (target_dir_uri), "obex") != 0) {
+			result = gnome_vfs_get_volume_free_space (target_dir_uri, &free_bytes);
+		} else {
+			result = GNOME_VFS_ERROR_NOT_SUPPORTED;
+		}
+		
 		if (result == GNOME_VFS_OK) {
 			if (!move && !link && progress->progress_info->bytes_total > free_bytes) {
 				result = GNOME_VFS_ERROR_NO_SPACE;
@@ -2512,7 +2529,11 @@ gnome_vfs_xfer_uri_internal (const GList *source_uris,
 					 * Make sure we have space for the copies.
 					 */
 					target_dir_uri = gnome_vfs_uri_get_parent ((GnomeVFSURI *)merge_target_uri_list->data);
-					result = gnome_vfs_get_volume_free_space (target_dir_uri, &free_bytes);
+					if (strcmp (gnome_vfs_uri_get_scheme (target_dir_uri), "obex") != 0) {
+						result = gnome_vfs_get_volume_free_space (target_dir_uri, &free_bytes);
+					} else {
+						result = GNOME_VFS_ERROR_NOT_SUPPORTED;
+					}
 					
 					if (result == GNOME_VFS_OK) {
 						if (progress->progress_info->bytes_total > free_bytes) {

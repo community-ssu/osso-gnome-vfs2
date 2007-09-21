@@ -147,7 +147,6 @@ noinst_HEADERS =				\
 	gnome-vfs-hal-mounts.h			\
 	gnome-vfs-iso9660.h			\
 	gnome-vfs-job-queue.h			\
-	gnome-vfs-job-slave.h			\
 	gnome-vfs-job.h				\
 	gnome-vfs-mime-magic.h			\
 	gnome-vfs-mime-private.h		\
@@ -157,7 +156,6 @@ noinst_HEADERS =				\
 	gnome-vfs-monitor-private.h		\
 	gnome-vfs-private-utils.h		\
 	gnome-vfs-private.h			\
-	gnome-vfs-thread-pool.h			\
 	gnome-vfs-unix-mounts.h 		\
 	gnome-vfs-volume-monitor-client.h	\
 	gnome-vfs-volume-monitor-daemon.h	\
@@ -269,7 +267,6 @@ libgnomevfs_2_la_SOURCES =			\
 	gnome-vfs-inet-connection.c		\
 	gnome-vfs-init.c			\
 	gnome-vfs-job-queue.c			\
-	gnome-vfs-job-slave.c			\
 	gnome-vfs-job.c				\
 	gnome-vfs-method.c			\
 	gnome-vfs-mime-handlers.c		\
@@ -295,7 +292,6 @@ libgnomevfs_2_la_SOURCES =			\
 	gnome-vfs-socket-buffer.c		\
 	gnome-vfs-socket.c			\
 	gnome-vfs-ssl.c				\
-	gnome-vfs-thread-pool.c			\
 	gnome-vfs-transform.c			\
 	gnome-vfs-uri.c				\
 	gnome-vfs-utils.c			\

@@ -43,7 +43,7 @@
 #include <sys/cdio.h>
 #endif
 
-/*#include "gnome-vfs-iso9660.h"*/
+#include "gnome-vfs-iso9660.h"
 #include "gnome-vfs-cdrom.h"
 
 
@@ -158,7 +158,6 @@ _gnome_vfs_get_cdrom_type (const char *vol_dev_path, int* fd)
 #endif /* defined(__linux__) */
 }
 
-#ifdef WITH_ISO9660
 #ifdef __linux__
 static int
 get_iso9660_volume_name_data_track_offset (int fd)
@@ -245,4 +244,4 @@ _gnome_vfs_get_iso9660_volume_name (int fd)
 	}
 	return g_strndup (iso_buffer.volume_id, 32);
 }
-#endif
+

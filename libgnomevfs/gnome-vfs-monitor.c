@@ -452,16 +452,7 @@ gnome_vfs_monitor_callback (GnomeVFSMethodHandle *method_handle,
 				send_uri_changes_now (monitor_handle, uri, now);
 				callback_data->send_at = now;
 			} else {
-				time_t when;
-
-				/* Make sure we don't send events in
-				 * the future, handle the case where
-				 * the system time is set back.
-				 */
-				when  = MIN(last_data->send_at, now);
-				when += CONSECUTIVE_CALLBACK_DELAY;
-
-				callback_data->send_at = when;
+				callback_data->send_at = last_data->send_at + CONSECUTIVE_CALLBACK_DELAY;
 			}
 		}
 		

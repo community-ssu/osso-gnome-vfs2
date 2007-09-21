@@ -788,13 +788,6 @@ connection_handle_close (DaemonConnection *conn,
 					      context);
 	gnome_vfs_daemon_set_current_connection (NULL);
 
-	/* Clear the handle so we don't close it twice. If close is not
-	 * successful, all modules destroy their internal handle data anyway so
-	 * we can't call close twice on a handle even if it fails the first
-	 * time.
-	 */
-	handle->vfs_handle = NULL;
-
 	if (cancellation) {
 		connection_remove_cancellation (conn, cancellation);
 	}
@@ -803,6 +796,9 @@ connection_handle_close (DaemonConnection *conn,
 		return;
 	}
 
+	/* Clear the handle so we don't close it twice. */
+	handle->vfs_handle = NULL;
+	
 	remove_file_handle (handle);
 
 	connection_reply_ok (conn, message);
@@ -1371,8 +1367,6 @@ connection_handle_get_file_info (DaemonConnection *conn,
 							  context);
 	gnome_vfs_daemon_set_current_connection (NULL);
 
-	gnome_vfs_uri_unref (uri);
-
 	if (cancellation) {
 		connection_remove_cancellation (conn, cancellation);
 	}
@@ -1482,8 +1476,6 @@ connection_handle_is_local (DaemonConnection *conn,
 	gnome_vfs_daemon_set_current_connection (conn->conn);
 	is_local = gnome_vfs_uri_is_local (uri);
 	gnome_vfs_daemon_set_current_connection (NULL);
-
-	gnome_vfs_uri_unref (uri);
 
 	reply = connection_create_reply_ok (message);
 
@@ -1902,9 +1894,6 @@ connection_handle_find_directory (DaemonConnection *conn,
 	gnome_vfs_uri_unref (uri);
 
 	if (connection_check_and_reply_error (conn, message, result)) {
-		if (result_uri) {
-			gnome_vfs_uri_unref (result_uri);
-		}
 		return;
 	}
 
@@ -1919,10 +1908,6 @@ connection_handle_find_directory (DaemonConnection *conn,
 		g_error ("Out of memory");
 	}
 	g_free (str);
-
-	if (result_uri) {
-		gnome_vfs_uri_unref (result_uri);
-	}
 
 	dbus_connection_send (conn->conn, reply, NULL);
 	dbus_message_unref (reply);

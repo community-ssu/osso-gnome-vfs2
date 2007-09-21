@@ -52,7 +52,7 @@
 
 /* Global variables used by the HTTP proxy config */
 static GConfClient *gl_client = NULL;
-G_LOCK_DEFINE_STATIC(gl_mutex);	/* This mutex protects preference values
+static GMutex *gl_mutex = NULL;	/* This mutex protects preference values
 				 * and ensures serialization of authentication
 				 * hook callbacks       
 				 */
@@ -247,7 +247,7 @@ gboolean proxy_for_uri (GnomeVFSToplevelURI *toplevel_uri,
 
     ret = proxy_should_for_hostname (toplevel_uri->host_name);
 
-    G_LOCK(gl_mutex);
+    g_mutex_lock (gl_mutex);
 
     if (ret && gl_http_proxy != NULL) {
 	ret = host_port_from_string(gl_http_proxy, &(proxy_info->host),
@@ -263,7 +263,7 @@ gboolean proxy_for_uri (GnomeVFSToplevelURI *toplevel_uri,
 	ret = FALSE;
     }
 
-    G_UNLOCK(gl_mutex);
+    g_mutex_unlock(gl_mutex);
 
     return ret;
 }
@@ -499,7 +499,7 @@ notify_gconf_value_changed(GConfClient * client,
 	|| strcmp(key, KEY_GCONF_HTTP_PROXY_PORT) == 0) {
 	gboolean use_proxy_value;
 
-	G_LOCK(gl_mutex);
+	g_mutex_lock(gl_mutex);
 
 	/* Check and see if we are using the proxy */
 	use_proxy_value =
@@ -507,20 +507,20 @@ notify_gconf_value_changed(GConfClient * client,
 				  KEY_GCONF_USE_HTTP_PROXY, NULL);
 	construct_gl_http_proxy(use_proxy_value);
 
-	G_UNLOCK(gl_mutex);
+	g_mutex_unlock(gl_mutex);
     } else if (strcmp(key, KEY_GCONF_HTTP_AUTH_USER) == 0
 	       || strcmp(key, KEY_GCONF_HTTP_AUTH_PW) == 0
 	       || strcmp(key, KEY_GCONF_HTTP_USE_AUTH) == 0) {
 	gboolean use_proxy_auth;
 
-	G_LOCK(gl_mutex);
+	g_mutex_lock(gl_mutex);
 
 	use_proxy_auth =
 	    gconf_client_get_bool(gl_client,
 				  KEY_GCONF_HTTP_USE_AUTH, NULL);
 	set_proxy_auth(use_proxy_auth);
 
-	G_UNLOCK(gl_mutex);
+	g_mutex_unlock(gl_mutex);
     }
 }
 
@@ -530,8 +530,8 @@ void proxy_init(void)
     gboolean use_proxy;
     gboolean use_proxy_auth;
 
-    G_LOCK(gl_mutex);
     gl_client = gconf_client_get_default();
+    gl_mutex = g_mutex_new();
 
     gconf_client_add_dir(gl_client, PATH_GCONF_GNOME_VFS,
 			 GCONF_CLIENT_PRELOAD_ONELEVEL, &gconf_error);
@@ -551,7 +551,6 @@ void proxy_init(void)
 	g_error_free(gconf_error);
 	gconf_error = NULL;
     }
-    G_UNLOCK(gl_mutex);
 
     /* Load the http proxy setting */
     use_proxy =

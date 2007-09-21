@@ -784,20 +784,11 @@ static int read_response_block(ne_request *req, struct ne_response *resp,
 	if (resp->body.chunk.remain == 0) {
 	    unsigned long chunk_len;
 	    char *ptr;
- 	    ssize_t ret;
 
             /* Read the chunk size line into a temporary buffer. */
-	    ret = ne_sock_readline(sock, req->respbuf, sizeof req->respbuf);
- 	    if (ret == NE_SOCK_CLOSED) {
- 		    /* Treat CLOSED as EOF (no chunk size) as the ending
- 		     * chunk... this is a workaround for broken libupnp servers
- 		     * that doesn't send the last 0 sized chunk.
- 		     */
- 		    chunk_len = 0;
- 	    }
- 	    else if (ret < 0) {
- 		    return aborted(req, "Could not read chunk size", ret);
- 	    } else {
+            SOCK_ERR(req,
+                     ne_sock_readline(sock, req->respbuf, sizeof req->respbuf),
+                     _("Could not read chunk size"));
 		    NE_DEBUG(NE_DBG_HTTP, "[chunk] < %s", req->respbuf);
 		    chunk_len = strtoul(req->respbuf, &ptr, 16);
 		    /* limit chunk size to <= UINT_MAX, so it will probably
@@ -806,8 +797,6 @@ static int read_response_block(ne_request *req, struct ne_response *resp,
 			chunk_len == ULONG_MAX || chunk_len > UINT_MAX) {
 			    return aborted(req, _("Could not parse chunk size"), 0);
 		    }
-	    }
-	    
 	    NE_DEBUG(NE_DBG_HTTP, "Got chunk size: %lu\n", chunk_len);
 	    resp->body.chunk.remain = chunk_len;
 	}
@@ -1344,17 +1333,6 @@ int ne_begin_request(ne_request *req)
 	rdr->use = rdr->accept_response(rdr->userdata, req, st);
     }
 
-    if (st->code == 404) {
-       /* We close the connection here because otherwise if a
-        * consequent gnome_vfs_open_uri() is called then the socket
-        * is still open with the http content and the the header read
-        * picks up the first line of the last request's content. The
-        * other way around this I guess would be to read the content
-        * and leave the connection open.
-        */
-        ne_close_connection(req->session);
-    }
-    
     return NE_OK;
 }
 

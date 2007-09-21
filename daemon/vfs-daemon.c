@@ -562,14 +562,6 @@ daemon_handle_monitor_cancel (DBusConnection *conn, DBusMessage *message)
 		return;
 	}
 
-	if (!monitors) {
-		/* Ignore this silently, can happen if the daemon is restarted
-		 * and the monitor hash isn't setup yet.
-		 */
-		dbus_util_reply_result (conn, message, GNOME_VFS_OK);
-		return;
-	}
-	
 	handle = g_hash_table_lookup (monitors, GINT_TO_POINTER (id));
 	if (handle) {
 		result = gnome_vfs_monitor_cancel (handle->vfs_handle);
@@ -932,10 +924,6 @@ main (int argc, char *argv[])
 
 	setlocale(LC_ALL, "");
 
-	if (!g_thread_supported ()) {
-		g_thread_init (NULL);
-	}
-	
 	g_type_init ();
 
 	gnome_vfs_set_is_daemon (GNOME_VFS_TYPE_VOLUME_MONITOR_DAEMON,

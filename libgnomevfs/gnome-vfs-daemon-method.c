@@ -587,7 +587,7 @@ execute_operation (const gchar      *method,
 		   ...)
 {
 	DBusMessage *message;
-	DBusMessage *reply = NULL;
+	DBusMessage *reply;
 	va_list      var_args;
 	gint32       cancellation_id;
 	DBusError    error;
@@ -632,16 +632,13 @@ execute_operation (const gchar      *method,
 
 	dbus_message_unref (message);
 	
-	if (pending_call) {
 		while (!dbus_pending_call_get_completed (pending_call) &&
 		       dbus_connection_read_write_dispatch (connection->connection, -1))
 			;
 
-		if (dbus_pending_call_get_completed (pending_call))
 			reply = dbus_pending_call_steal_reply (pending_call);
 
 		dbus_pending_call_unref (pending_call);
-	}
 
 	if (cancellation_id != -1) {
 		cancellation_id_free (cancellation_id, context);

@@ -842,14 +842,6 @@ make_volume_name_from_path_and_fs (const char *mount_path, const char *fs_type)
 {
 	const char *name;
 
-	/* Maemo patch. */
-	char *tmp;
-	tmp = _gnome_vfs_filesystem_get_label_for_mount_point (mount_path);
-	if (tmp) {
-		return tmp;
-	}
-	/* End of Maemo patch. */
-	
 	if (mount_path[0] == '/' && mount_path[1] == '\0') {
 		return g_strdup (_("Root Volume"));
 	}
@@ -943,7 +935,7 @@ create_vol_from_mount (GnomeVFSVolumeMonitor *volume_monitor, GnomeVFSUnixMount 
 		case CDS_MIXED:
 			/* Get volume name */
 			if (fd > 0) {
-				tmp_name = NULL; /*_gnome_vfs_get_iso9660_volume_name (fd);*/
+				tmp_name = _gnome_vfs_get_iso9660_volume_name (fd);
 				display_name = modify_volume_name_for_display (tmp_name);
 				g_free (tmp_name);
 			}
@@ -990,10 +982,6 @@ create_vol_from_mount (GnomeVFSVolumeMonitor *volume_monitor, GnomeVFSUnixMount 
 		vol->priv->is_user_visible = 1;
 		break;
 	default:
-		/* Force mounts under /media to become user visible. */
-		if (g_str_has_prefix (mount->mount_path, "/media/")) {
-			vol->priv->is_user_visible = 1;
-		}
 		break;
 	}
 	

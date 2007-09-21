@@ -28,7 +28,5 @@
 
 char *   _gnome_vfs_filesystem_volume_name (const char *fs_type);
 gboolean _gnome_vfs_filesystem_use_trash   (const char *fs_type);
-char *   _gnome_vfs_filesystem_get_label_for_mount_point (const char *mount_point);
-char *   _gnome_vfs_filesystem_get_label_for_slot_name (const char *slot_name);
 
 #endif /* GNOME_VFS_FILESYSTEM_TYPE_H */

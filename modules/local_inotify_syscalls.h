@@ -49,7 +49,7 @@
 # warning "Unsupported architecture"
 #endif
 
-#if defined(__i386__) || defined(__x86_64) || defined(__alpha__) || defined(__ppc__) || defined(__sparc__) || defined(__powerpc__) || defined(__powerpc64__) || defined(__ia64__) || defined(__s390__) || defined(__arm__)
+#if defined(__i386__) || defined(__x86_64) || defined(__alpha__) || defined(__ppc__) || defined(__sparc__) || defined(__powerpc__) || defined(__powerpc64__) || defined(__ia64__) || defined(__s390__)
 static inline int inotify_init (void)
 {
 	return syscall (__NR_inotify_init);

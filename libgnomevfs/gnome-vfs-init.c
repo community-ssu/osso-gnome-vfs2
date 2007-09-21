@@ -32,7 +32,6 @@
 #include "gnome-vfs-private-utils.h"
 
 #include "gnome-vfs-async-job-map.h"
-#include "gnome-vfs-thread-pool.h"
 #include "gnome-vfs-job-queue.h"
 #include "gnome-vfs-volume-monitor-private.h"
 #include "gnome-vfs-module-callback-private.h"
@@ -43,7 +42,6 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gtypes.h>
 #include <glib/gstdio.h>
-#include <libgnomevfs/gnome-vfs-job-slave.h>
 
 #ifndef DBUS_API_SUBJECT_TO_CHANGE
 #define DBUS_API_SUBJECT_TO_CHANGE 1
@@ -91,7 +89,6 @@ gnome_vfs_thread_init (void)
 	_gnome_vfs_module_callback_private_init ();
 	
 	_gnome_vfs_async_job_map_init ();
-	_gnome_vfs_thread_pool_init ();
 	_gnome_vfs_job_queue_init ();
 }
 
@@ -183,7 +180,6 @@ gnome_vfs_initialized (void)
 void
 gnome_vfs_shutdown (void)
 {
-	_gnome_vfs_thread_backend_shutdown ();
 	gnome_vfs_mime_shutdown ();
 #ifndef G_OS_WIN32
 	_gnome_vfs_volume_monitor_shutdown ();

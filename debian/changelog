@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-1osso30) unstable; urgency=low
+
+  * Remove debug output from the http module
+	
+ -- Richard Hult <richard@imendio.com>  Tue, 25 Sep 2007 13:46:37 +0200
+
 osso-gnome-vfs2 (2.16.3-1osso29) unstable; urgency=low
 
   * Fixes: NB#22048, Extra threads left running after changing the background

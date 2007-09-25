@@ -1,6 +1,6 @@
 --- modules/http-neon-method.c-unmod	2007-02-01 12:26:44.000000000 +0100
 +++ modules/http-neon-method.c	2007-02-01 17:30:33.000000000 +0100
-@@ -1104,9 +1104,8 @@ std_headers_to_file_info (ne_request *re
+@@ -1104,9 +1104,7 @@ std_headers_to_file_info (ne_request *re
  	
  	value  = ne_get_response_header (req, "Content-Type");
  
@@ -8,7 +8,6 @@
 -		g_free (info->mime_type);
 -
 +	if (value != NULL && info->mime_type == NULL) {
-+		g_print ("get from server: %s\n", value);
  		info->mime_type = strip_semicolon (value);
  		info->valid_fields |= GNOME_VFS_FILE_INFO_FIELDS_MIME_TYPE;
  	}

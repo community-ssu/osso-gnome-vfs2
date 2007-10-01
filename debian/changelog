@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-1osso31) unstable; urgency=low
+
+  * Fixes: NB#71470, Crash in gnome-vfs
+	
+ -- Richard Hult <richard@imendio.com>  Mon,  1 Oct 2007 14:57:16 +0200
+
 osso-gnome-vfs2 (2.16.3-1osso30) unstable; urgency=low
 
   * Remove debug output from the http module

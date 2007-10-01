@@ -1,0 +1,16 @@
+--- modules/http-neon-method.c-unmod	2007-10-01 11:48:39.000000000 +0200
++++ modules/http-neon-method.c	2007-10-01 14:54:43.000000000 +0200
+@@ -1791,6 +1791,13 @@
+ 	new_uri = gnome_vfs_uri_new (redir_texturi);
+ 	
+ 	NE_FREE (redir_texturi);
++
++	/* This happens if we are redirected to an unsupported scheme
++	 * (http->https when https is not installed, for instance).
++	 */
++	if (new_uri == NULL) {
++		return GNOME_VFS_ERROR_NOT_SUPPORTED;
++	}
+ 	
+ 	/* see if redirect is to another host:port pair so we need a new
+ 	 * connection/session */

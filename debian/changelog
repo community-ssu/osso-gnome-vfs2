@@ -2,8 +2,8 @@ osso-gnome-vfs2 (2.16.3-1osso32) unstable; urgency=low
 
   * Fixes: NB#65193, It takes about 10 minutes before Samba server is
   * Fixes: NB#74527, Timeouts should be reduced in gnome-vfs smb module
-	
- -- Richard Hult <richard@imendio.com>  Wed, 31 Oct 2007 08:55:132 +0100
+
+ -- Richard Hult <richard@imendio.com>  Wed, 31 Oct 2007 08:55:32 +0100
 
 osso-gnome-vfs2 (2.16.3-1osso31) unstable; urgency=low
 

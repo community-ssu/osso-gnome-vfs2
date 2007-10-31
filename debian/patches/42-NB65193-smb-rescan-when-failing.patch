@@ -1,0 +1,21 @@
+Index: modules/smb-method.c
+===================================================================
+--- modules/smb-method.c	(revision 14679)
++++ modules/smb-method.c	(working copy)
+@@ -528,7 +528,6 @@ update_workgroup_cache (void)
+ 		/* Up to date */
+ 		return;
+ 	}
+-	workgroups_timestamp = t;
+ 
+ 	DEBUG_SMB(("update_workgroup_cache: enumerating workgroups\n"));
+ 	
+@@ -545,6 +544,8 @@ update_workgroup_cache (void)
+ 	}
+ 
+ 	if (dir != NULL) {
++		workgroups_timestamp = t;
++
+ 		while ((dirent = smb_context->readdir (smb_context, dir)) != NULL) {
+ 			if (dirent->smbc_type == SMBC_WORKGROUP &&
+ 			    dirent->name != NULL &&

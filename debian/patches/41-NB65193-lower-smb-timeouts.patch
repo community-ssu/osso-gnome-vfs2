@@ -1,0 +1,26 @@
+Index: modules/smb-method.c
+===================================================================
+--- modules/smb-method.c	(revision 14670)
++++ modules/smb-method.c	(working copy)
+@@ -92,8 +92,8 @@ static GHashTable *user_cache = NULL;
+ 
+ #define SMB_BLOCK_SIZE (32*1024)
+ 
+-/* Reap unused server connections and user cache after 30 minutes */
+-#define CACHE_REAP_TIMEOUT (30 * 60)
++/* Reap unused server connections and user cache after 10 minutes */
++#define CACHE_REAP_TIMEOUT (10 * 60)
+ static guint cache_reap_timeout = 0;
+ 
+ /* We load a default workgroup from gconf */
+@@ -105,8 +105,8 @@ static guint cache_reap_timeout = 0;
+ /* Guest logins use: */
+ #define GUEST_LOGIN "guest"
+ 
+-/* 5 minutes before we re-read the workgroup cache again */
+-#define WORKGROUP_CACHE_TIMEOUT (5*60)
++/* 1 minute before we re-read the workgroup cache again */
++#define WORKGROUP_CACHE_TIMEOUT (1*60)
+ 
+ static GHashTable *workgroups = NULL;
+ static time_t workgroups_timestamp = 0;

@@ -1,0 +1,30 @@
+--- modules/http-neon-method.c-unmod	2007-11-12 13:40:38.000000000 +0100
++++ modules/http-neon-method.c	2007-11-12 13:45:55.000000000 +0100
+@@ -1852,7 +1852,7 @@ dispatch_head_request (ne_request *req)
+ {
+ 	gboolean must_close = FALSE;
+ 	char buffer[1];
+-	size_t len;
++	size_t len = -1;
+ 	int res;
+ 	
+ 	do {
+@@ -1862,12 +1862,14 @@ dispatch_head_request (ne_request *req)
+ 			len = ne_read_response_block (req, buffer, sizeof buffer);
+ 			must_close = (len > 0);
+ 		}
+-
+-		if (NE_OK == res) {
+-			res = ne_end_request (req);
+-		}
+ 	} while (NE_RETRY == res);
+ 
++	if (len != -1) {
++		do {
++			res = ne_end_request (req);
++		} while (NE_RETRY == res);
++	}
++	
+ 	if (must_close) {
+ 		DEBUG_HTTP ("explictly closing connection");
+ 		ne_close_connection (ne_get_session (req));

@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-1osso33) unstable; urgency=low
+
+  * Fixes: NB#B74125, RSS crashes while refreshing after a OFF_ON cycle of
+
+ -- Richard Hult <richard@imendio.com>  Tue, 13 Nov 2007 10:31:15 +0100
+
 osso-gnome-vfs2 (2.16.3-1osso32) unstable; urgency=low
 
   * Fixes: NB#65193, It takes about 10 minutes before Samba server is

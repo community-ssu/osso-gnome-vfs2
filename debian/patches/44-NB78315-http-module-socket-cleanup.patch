@@ -1,0 +1,11 @@
+--- imported/neon/ne_request.c 
++++ imported/neon/ne_request.c 
+@@ -1545,7 +1545,7 @@
+ 
+     if (ret) {
+         ne_set_error(sess, "%s: %s", err, ne_sock_error(sess->socket));
+-        ne_sock_close(sess->socket);
++        ne_close_connection(sess);
+ 	return NE_CONNECT;
+     }
+ 

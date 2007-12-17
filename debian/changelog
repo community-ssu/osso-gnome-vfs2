@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-1osso35) unstable; urgency=low
+
+  * Fixes: NB#78397, repeating xdg_mime ops leak xdg_mime hash allocations
+
+ -- Richard Hult <richard@imendio.com>  Mon, 17 Dec 2007 11:46:16 +0100
+
 osso-gnome-vfs2 (2.16.3-1osso34) unstable; urgency=low
 
   * Fixes: NB#78315, ne_gnomevfs_last_error accessing freed memory

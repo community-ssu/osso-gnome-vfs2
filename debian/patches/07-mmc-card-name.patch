@@ -175,6 +175,14 @@ Index: libgnomevfs/gnome-vfs-hal-mounts.c
 ===================================================================
 --- libgnomevfs/gnome-vfs-hal-mounts.c	(revision 11974)
 +++ libgnomevfs/gnome-vfs-hal-mounts.c	(arbetskopia)
+@@ -50,6 +50,7 @@
+ #include "gnome-vfs-hal-mounts.h"
+ #include "gnome-vfs-volume-monitor-daemon.h"
+ #include "gnome-vfs-volume-monitor-private.h"
++#include "gnome-vfs-filesystem-type.h"
+ 
+ #ifndef PATHNAME_MAX
+ # define PATHNAME_MAX	1024
 @@ -314,6 +314,47 @@ out:
  	}
  }

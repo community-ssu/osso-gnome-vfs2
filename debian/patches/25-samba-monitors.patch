@@ -47,7 +47,7 @@ Index: modules/smb-method.c
  	
 +	monitor_mutex = g_mutex_new ();
 +	monitor_hash = g_hash_table_new_full (gnome_vfs_uri_hash,
-+					      gnome_vfs_uri_equal,
++					      (GEqualFunc) gnome_vfs_uri_equal,
 +					      (GDestroyNotify) gnome_vfs_uri_unref,
 +					      NULL);
 +

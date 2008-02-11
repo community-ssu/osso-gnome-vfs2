@@ -1,3 +1,14 @@
+osso-gnome-vfs2 (2.16.3-1osso36) unstable; urgency=low
+
+  [ Richard Hult ]
+  * Add patches for xfer cancellation
+  
+  [ Marius Vollmer ]
+  * 07-mmc-card-name.patch, 25-samba-monitors.patch: silenced compilation
+    warnings.
+
+ -- Marius Vollmer <marius.vollmer@nokia.com>  Mon, 11 Feb 2008 15:25:05 +0200
+
 osso-gnome-vfs2 (2.16.3-1osso35) unstable; urgency=low
 
   * Fixes: NB#78397, repeating xdg_mime ops leak xdg_mime hash allocations

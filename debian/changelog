@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-1osso37~unreleased) unstable; urgency=low
+
+  * 
+
+ -- Marius Vollmer <marius.vollmer@nokia.com>  Tue, 12 Feb 2008 15:10:40 +0200
+
 osso-gnome-vfs2 (2.16.3-1osso36) unstable; urgency=low
 
   [ Richard Hult ]

@@ -1,0 +1,333 @@
+--- libgnomevfs/gnome-vfs-job.c-unmod	2008-01-21 10:47:56.000000000 +0100
++++ libgnomevfs/gnome-vfs-job.c	2008-01-21 10:48:33.000000000 +0100
+@@ -1562,7 +1562,8 @@ execute_xfer (GnomeVFSJob *job)
+ 					 xfer_callback,
+ 					 job,
+ 					 xfer_op->progress_sync_callback,
+-					 xfer_op->sync_callback_data);
++					 xfer_op->sync_callback_data,
++					 job->op->context);
+ 
+ 	/* If the xfer functions returns an error now, something really bad
+          * must have happened.
+--- libgnomevfs/gnome-vfs-cancellable-ops.h-unmod	2008-01-21 10:47:56.000000000 +0100
++++ libgnomevfs/gnome-vfs-cancellable-ops.h	2008-01-21 10:53:11.000000000 +0100
+@@ -48,6 +48,9 @@ GnomeVFSResult gnome_vfs_create_uri_canc
+ GnomeVFSResult gnome_vfs_close_cancellable
+ 					(GnomeVFSHandle *handle,
+ 					 GnomeVFSContext *context);
++GnomeVFSResult gnome_vfs_close_cancellable_unchecked
++                                        (GnomeVFSHandle *handle,
++					 GnomeVFSContext *context);
+ 
+ GnomeVFSResult gnome_vfs_read_cancellable
+ 					(GnomeVFSHandle *handle,
+@@ -139,7 +142,8 @@ GnomeVFSResult _gnome_vfs_xfer_private  
+ 					 GnomeVFSXferProgressCallback progress_callback,
+ 					 gpointer data,
+ 					 GnomeVFSXferProgressCallback sync_progress_callback,
+-					 gpointer sync_progress_data);
++					 gpointer sync_progress_data,
++					 GnomeVFSContext *context);
+ 
+ GnomeVFSResult	gnome_vfs_directory_read_next_cancellable
+ 					(GnomeVFSDirectoryHandle *handle,
+--- libgnomevfs/gnome-vfs-cancellable-ops.c-unmod	2008-01-21 10:54:41.000000000 +0100
++++ libgnomevfs/gnome-vfs-cancellable-ops.c	2008-01-21 10:54:46.000000000 +0100
+@@ -109,6 +109,15 @@ gnome_vfs_close_cancellable (GnomeVFSHan
+ }
+ 
+ GnomeVFSResult
++gnome_vfs_close_cancellable_unchecked (GnomeVFSHandle *handle,
++				       GnomeVFSContext *context)
++{
++	g_return_val_if_fail (handle != NULL, GNOME_VFS_ERROR_BAD_PARAMETERS);
++
++	return _gnome_vfs_handle_do_close (handle, context);
++}
++
++GnomeVFSResult
+ gnome_vfs_read_cancellable (GnomeVFSHandle *handle,
+ 			    gpointer buffer,
+ 			    GnomeVFSFileSize bytes,
+--- libgnomevfs/gnome-vfs-xfer.c-unmod	2008-01-21 10:47:56.000000000 +0100
++++ libgnomevfs/gnome-vfs-xfer.c	2008-01-21 10:51:15.000000000 +0100
+@@ -1209,7 +1209,8 @@ copy_file_data (GnomeVFSHandle *target_h
+ 		GnomeVFSXferErrorMode *error_mode,
+ 		guint source_block_size,
+ 		guint target_block_size,
+-		gboolean *skip)
++		gboolean *skip,
++		GnomeVFSContext *context)
+ {
+ 	GnomeVFSResult result;
+ 	gpointer buffer;
+@@ -1245,8 +1246,8 @@ copy_file_data (GnomeVFSHandle *target_h
+ 		do {
+ 			retry = FALSE;
+ 
+-			result = gnome_vfs_read (source_handle, buffer,
+-						 block_size, &bytes_read);
++			result = gnome_vfs_read_cancellable (source_handle, buffer,
++							     block_size, &bytes_read, context);
+ 			if (forget_cache) {
+ 				gnome_vfs_forget_cache (source_handle,
+ 							total_bytes_read, bytes_read);
+@@ -1269,9 +1270,10 @@ copy_file_data (GnomeVFSHandle *target_h
+ 		do {
+ 			retry = FALSE;
+ 
+-			result = gnome_vfs_write (target_handle, write_buffer,
+-						  bytes_to_write,
+-						  &bytes_written);
++			result = gnome_vfs_write_cancellable (target_handle, write_buffer,
++							      bytes_to_write,
++							      &bytes_written,
++							      context);
+ 
+ 			if (result != GNOME_VFS_OK) {
+ 				retry = handle_error (&result, progress, error_mode, skip);
+@@ -1403,7 +1405,8 @@ copy_symlink (GnomeVFSURI *source_uri,
+ 	      GnomeVFSXferErrorMode *error_mode,
+ 	      GnomeVFSXferOverwriteMode *overwrite_mode,
+ 	      GnomeVFSProgressCallbackState *progress,
+-	      gboolean *skip)
++	      gboolean *skip,
++	      GnomeVFSContext *context)
+ {
+ 	GnomeVFSResult result;
+ 	gboolean retry;
+@@ -1415,7 +1418,7 @@ copy_symlink (GnomeVFSURI *source_uri,
+ 	do {
+ 		retry = FALSE;
+ 
+-		result = gnome_vfs_create_symbolic_link (target_uri, link_name);
++		result = gnome_vfs_create_symbolic_link_cancellable (target_uri, link_name, context);
+ 
+ 		if (result == GNOME_VFS_ERROR_FILE_EXISTS) {
+ 			remove = FALSE;
+@@ -1460,7 +1463,8 @@ copy_file (GnomeVFSFileInfo *info,
+ 	   GnomeVFSXferErrorMode *error_mode,
+ 	   GnomeVFSXferOverwriteMode *overwrite_mode,
+ 	   GnomeVFSProgressCallbackState *progress,
+-	   gboolean *skip)
++	   gboolean *skip,
++	   GnomeVFSContext *context)
+ {
+ 	GnomeVFSResult close_result, result;
+ 	GnomeVFSHandle *source_handle, *target_handle;
+@@ -1490,11 +1494,11 @@ copy_file (GnomeVFSFileInfo *info,
+ 
+ 
+ 	if (*skip) {
+-		gnome_vfs_close (source_handle);
++		gnome_vfs_close_cancellable_unchecked (source_handle, context);
+ 		return GNOME_VFS_OK;
+ 	}
+ 	if (result != GNOME_VFS_OK) {
+-		gnome_vfs_close (source_handle);
++		gnome_vfs_close_cancellable_unchecked (source_handle, context);
+ 		return result;
+ 	}
+ 
+@@ -1510,7 +1514,7 @@ copy_file (GnomeVFSFileInfo *info,
+ 					 ? info->io_block_size : 8192,
+ 					 (target_dir_info->valid_fields & GNOME_VFS_FILE_INFO_FIELDS_IO_BLOCK_SIZE && target_dir_info->io_block_size > 0)
+ 					 ? target_dir_info->io_block_size : 8192,
+-					 skip);
++					 skip, context);
+ 	}
+ 
+ 	if (result == GNOME_VFS_OK 
+@@ -1518,13 +1522,13 @@ copy_file (GnomeVFSFileInfo *info,
+ 		result = GNOME_VFS_ERROR_INTERRUPTED;
+ 	}
+ 
+-	close_result = gnome_vfs_close (source_handle);
++	close_result = gnome_vfs_close_cancellable_unchecked (source_handle, context);
+ 	if (result == GNOME_VFS_OK && close_result != GNOME_VFS_OK) {
+ 		handle_error (&close_result, progress, error_mode, skip);
+ 		return close_result;
+ 	}
+ 
+-	close_result = gnome_vfs_close (target_handle);
++	close_result = gnome_vfs_close_cancellable_unchecked (target_handle, context);
+ 	if (result == GNOME_VFS_OK && close_result != GNOME_VFS_OK) {
+ 		handle_error (&close_result, progress, error_mode, skip);
+ 		return close_result;
+@@ -1565,7 +1569,8 @@ copy_directory (GnomeVFSFileInfo *source
+ 		GnomeVFSXferErrorMode *error_mode,
+ 		GnomeVFSXferOverwriteMode *overwrite_mode,
+ 		GnomeVFSProgressCallbackState *progress,
+-		gboolean *skip)
++		gboolean *skip,
++		GnomeVFSContext *context)
+ {
+ 	GnomeVFSResult result;
+ 	GnomeVFSDirectoryHandle *source_directory_handle;
+@@ -1659,11 +1664,11 @@ copy_directory (GnomeVFSFileInfo *source
+ 					result = copy_file (info, target_dir_info,
+ 							    source_uri, dest_uri, 
+ 							    xfer_options, error_mode, overwrite_mode, 
+-							    progress, &skip_child);
++							    progress, &skip_child, context);
+ 				} else if (info->type == GNOME_VFS_FILE_TYPE_DIRECTORY) {
+ 					result = copy_directory (info, source_uri, dest_uri, 
+ 								 xfer_options, error_mode, overwrite_mode, 
+-								 progress, &skip_child);
++								 progress, &skip_child, context);
+ 				} else if (info->type == GNOME_VFS_FILE_TYPE_SYMBOLIC_LINK) {
+ 					if (xfer_options & GNOME_VFS_XFER_FOLLOW_LINKS_RECURSIVE) {
+ 						GnomeVFSFileInfo *symlink_target_info = gnome_vfs_file_info_new ();
+@@ -1673,11 +1678,11 @@ copy_directory (GnomeVFSFileInfo *source
+ 							result = copy_file (symlink_target_info, target_dir_info,
+ 									    source_uri, dest_uri, 
+ 									    xfer_options, error_mode, overwrite_mode, 
+-									    progress, &skip_child);
++									    progress, &skip_child, context);
+ 						gnome_vfs_file_info_unref (symlink_target_info);
+ 					} else {
+ 						result = copy_symlink (source_uri, dest_uri, info->symlink_name,
+-								       error_mode, overwrite_mode, progress, &skip_child);
++								       error_mode, overwrite_mode, progress, &skip_child, context);
+ 					}
+ 				}
+ 				/* We don't want to overwrite a previous skip with FALSE, so we only
+@@ -1754,7 +1759,8 @@ copy_items (const GList *source_uri_list
+ 	    GnomeVFSXferErrorMode *error_mode,
+ 	    GnomeVFSXferOverwriteMode overwrite_mode,
+ 	    GnomeVFSProgressCallbackState *progress,
+-	    GList **p_source_uris_copied_list)
++	    GList **p_source_uris_copied_list,
++	    GnomeVFSContext *context)
+ {
+ 	GnomeVFSResult result;
+ 	const GList *source_item, *target_item;
+@@ -1832,16 +1838,16 @@ copy_items (const GList *source_uri_list
+ 							    source_uri, target_uri, 
+ 							    xfer_options, error_mode, 
+ 							    &overwrite_mode_abort, 
+-							    progress, &skip);
++							    progress, &skip, context);
+ 				} else if (info->type == GNOME_VFS_FILE_TYPE_DIRECTORY) {
+ 					result = copy_directory (info, source_uri, target_uri, 
+ 								 xfer_options, error_mode,
+ 								 &overwrite_mode_abort,
+-								 progress, &skip);
++								 progress, &skip, context);
+                                 } else if (info->type == GNOME_VFS_FILE_TYPE_SYMBOLIC_LINK) {
+ 					result = copy_symlink (source_uri, target_uri, info->symlink_name,
+ 							       error_mode, &overwrite_mode_abort,
+-							       progress, &skip);
++							       progress, &skip, context);
+                                 }
+ 				/* just ignore all the other special file system objects here */
+ 
+@@ -1918,7 +1924,8 @@ move_items (const GList *source_uri_list
+ 	    GnomeVFSXferOptions xfer_options,
+ 	    GnomeVFSXferErrorMode *error_mode,
+ 	    GnomeVFSXferOverwriteMode *overwrite_mode,
+-	    GnomeVFSProgressCallbackState *progress)
++	    GnomeVFSProgressCallbackState *progress,
++	    GnomeVFSContext *context)
+ {
+ 	GnomeVFSResult result;
+ 	const GList *source_item, *target_item;
+@@ -1962,10 +1969,11 @@ move_items (const GList *source_uri_list
+ 			/* no matter what the replace mode, just overwrite the destination
+ 			 * handle_name_conflicts took care of conflicting files
+ 			 */
+-			result = gnome_vfs_move_uri (source_uri, target_uri, 
+-						     (xfer_options & GNOME_VFS_XFER_USE_UNIQUE_NAMES) != 0
+-						     ? GNOME_VFS_XFER_OVERWRITE_MODE_ABORT
+-						     : GNOME_VFS_XFER_OVERWRITE_MODE_REPLACE);
++			result = gnome_vfs_move_uri_cancellable (source_uri, target_uri, 
++								 (xfer_options & GNOME_VFS_XFER_USE_UNIQUE_NAMES) != 0
++								 ? GNOME_VFS_XFER_OVERWRITE_MODE_ABORT
++								 : GNOME_VFS_XFER_OVERWRITE_MODE_REPLACE,
++								 context);
+ 
+ 
+ 			if (result == GNOME_VFS_ERROR_FILE_EXISTS) {
+@@ -2025,7 +2033,8 @@ link_items (const GList *source_uri_list
+ 	    GnomeVFSXferOptions xfer_options,
+ 	    GnomeVFSXferErrorMode *error_mode,
+ 	    GnomeVFSXferOverwriteMode *overwrite_mode,
+-	    GnomeVFSProgressCallbackState *progress)
++	    GnomeVFSProgressCallbackState *progress,
++	    GnomeVFSContext *context)
+ {
+ 	GnomeVFSResult result;
+ 	const GList *source_item, *target_item;
+@@ -2072,7 +2081,7 @@ link_items (const GList *source_uri_list
+ 			/* no matter what the replace mode, just overwrite the destination
+ 			 * handle_name_conflicts took care of conflicting files
+ 			 */
+-			result = gnome_vfs_create_symbolic_link (target_uri, source_reference); 
++			result = gnome_vfs_create_symbolic_link_cancellable (target_uri, source_reference, context);
+ 			if (result == GNOME_VFS_ERROR_FILE_EXISTS) {
+ 				/* deal with a name conflict -- ask the progress_callback for a better name */
+ 				g_free (progress->progress_info->duplicate_name);
+@@ -2360,7 +2369,8 @@ gnome_vfs_xfer_uri_internal (const GList
+ 			     GnomeVFSXferOptions xfer_options,
+ 			     GnomeVFSXferErrorMode error_mode,
+ 			     GnomeVFSXferOverwriteMode overwrite_mode,
+-			     GnomeVFSProgressCallbackState *progress)
++			     GnomeVFSProgressCallbackState *progress,
++			     GnomeVFSContext *context)
+ {
+ 	GnomeVFSResult result;
+ 	GList *source_uri_list, *target_uri_list;
+@@ -2581,20 +2591,20 @@ gnome_vfs_xfer_uri_internal (const GList
+ 				g_assert (!link);
+ 				result = move_items (source_uri_list, target_uri_list,
+ 						     xfer_options, &error_mode, &overwrite_mode, 
+-						     progress);
++						     progress, context);
+ 				if (result == GNOME_VFS_OK && merge_source_uri_list != NULL) {
+ 					result = copy_items (merge_source_uri_list, merge_target_uri_list,
+ 							     xfer_options, &error_mode, overwrite_mode, 
+-							     progress, &source_uri_list_copied);
++							     progress, &source_uri_list_copied, context);
+ 				}
+ 			} else if (link) {
+ 				result = link_items (source_uri_list, target_uri_list,
+ 						     xfer_options, &error_mode, &overwrite_mode,
+-						     progress);
++						     progress, context);
+ 			} else {
+ 				result = copy_items (source_uri_list, target_uri_list,
+ 						     xfer_options, &error_mode, overwrite_mode, 
+-						     progress, &source_uri_list_copied);
++						     progress, &source_uri_list_copied, context);
+ 			}
+ 			
+ 			if (result == GNOME_VFS_OK) {
+@@ -2627,7 +2637,8 @@ _gnome_vfs_xfer_private (const GList *so
+ 			GnomeVFSXferProgressCallback progress_callback,
+ 			gpointer data,
+ 			GnomeVFSXferProgressCallback sync_progress_callback,
+-			gpointer sync_progress_data)
++			gpointer sync_progress_data,
++			GnomeVFSContext *context)
+ {
+ 	GnomeVFSProgressCallbackState progress_state;
+ 	GnomeVFSXferProgressInfo progress_info;
+@@ -2679,7 +2690,7 @@ _gnome_vfs_xfer_private (const GList *so
+ 
+ 		call_progress (&progress_state, GNOME_VFS_XFER_PHASE_INITIAL);
+ 		result = gnome_vfs_xfer_uri_internal (source_uri_list, target_uri_list,
+-			xfer_options, error_mode, overwrite_mode, &progress_state);
++			xfer_options, error_mode, overwrite_mode, &progress_state, context);
+ 	}
+ 
+ 	call_progress (&progress_state, GNOME_VFS_XFER_PHASE_COMPLETED);
+@@ -2745,7 +2756,7 @@ gnome_vfs_xfer_uri_list (const GList *so
+ 	call_progress (&progress_state, GNOME_VFS_XFER_PHASE_INITIAL);
+ 
+ 	result = gnome_vfs_xfer_uri_internal (source_uri_list, target_uri_list,
+-		xfer_options, error_mode, overwrite_mode, &progress_state);
++		xfer_options, error_mode, overwrite_mode, &progress_state, NULL);
+ 
+ 	call_progress (&progress_state, GNOME_VFS_XFER_PHASE_COMPLETED);
+ 	free_progress (&progress_info);

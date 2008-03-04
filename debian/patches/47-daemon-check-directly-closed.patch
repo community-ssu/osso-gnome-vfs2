@@ -1,0 +1,101 @@
+--- libgnomevfs/gnome-vfs-daemon-method.c-unmod	2008-01-21 11:04:48.000000000 +0100
++++ libgnomevfs/gnome-vfs-daemon-method.c	2008-01-21 11:05:11.000000000 +0100
+@@ -905,13 +905,21 @@ do_close (GnomeVFSMethod       *method,
+ 	FileHandle     *handle;
+         DBusMessage    *reply;
+ 	GnomeVFSResult  result;
++	gboolean        directly_cancelled;
+ 
+ 	handle = (FileHandle *) method_handle;
+ 
++	g_print ("do_close, client side: context: %p, cancelled: %d\n",
++		 context,
++		 gnome_vfs_context_check_cancellation (context));
++
++	directly_cancelled = gnome_vfs_context_check_cancellation (context);
++
+ 	reply = execute_operation (DVD_DAEMON_METHOD_CLOSE,
+ 				   context, &result,
+ 				   DBUS_TIMEOUT_OPEN_CLOSE,
+ 				   DVD_TYPE_INT32, handle->handle_id,
++				   DVD_TYPE_BOOL, directly_cancelled,
+ 				   DVD_TYPE_LAST);
+ 
+ 	if (!reply) {
+--- daemon/daemon-connection.c-unmod	2008-01-21 11:20:20.000000000 +0100
++++ daemon/daemon-connection.c	2008-01-21 11:25:11.000000000 +0100
+@@ -699,6 +699,8 @@ connection_handle_create (DaemonConnecti
+ 	CancellationHandle *cancellation;
+ 	GnomeVFSContext    *context;
+ 
++	g_print ("\n---\n"); /* makes the debugging output easier to follow */
++
+ 	if (!get_operation_args (message, &cancellation_id,
+ 				 DVD_TYPE_URI, &uri,
+ 				 DVD_TYPE_INT32, &mode,
+@@ -756,9 +758,11 @@ connection_handle_close (DaemonConnectio
+ 	FileHandle         *handle;
+ 	CancellationHandle *cancellation;
+ 	GnomeVFSContext    *context;
++	gboolean            directly_cancelled;
+ 
+ 	if (!get_operation_args (message, &cancellation_id,
+ 				 DVD_TYPE_INT32, &handle_id,
++				 DVD_TYPE_BOOL, &directly_cancelled,
+ 				 DVD_TYPE_LAST)) {
+ 		connection_reply_result (conn, message,
+ 					 GNOME_VFS_ERROR_INTERNAL);
+@@ -766,7 +770,8 @@ connection_handle_close (DaemonConnectio
+ 		return;
+ 	}
+ 
+-	d(g_print ("close: %d (%d)\n", handle_id, cancellation_id));
++	g_print ("close: %d (cancellation id %d), directly closed: %d\n",
++		 handle_id, cancellation_id, directly_cancelled);
+ 
+ 	handle = get_file_handle (conn, handle_id);
+ 	if (!handle) {
+@@ -775,7 +780,20 @@ connection_handle_close (DaemonConnectio
+ 		return;
+ 	}
+ 
+-	if (cancellation_id != -1) {
++	if (directly_cancelled) {
++		GnomeVFSContext *temp_context;
++		GnomeVFSCancellation *temp_cancellation;
++
++		g_print ("Creating fake context and cancelling it...\n");
++
++		temp_context = gnome_vfs_context_new ();
++		temp_cancellation = gnome_vfs_context_get_cancellation (temp_context);
++		gnome_vfs_cancellation_cancel (temp_cancellation);
++
++		cancellation = NULL;
++		context = temp_context;
++	}
++	else if (cancellation_id != -1) {
+ 		cancellation = connection_add_cancellation (conn, cancellation_id);
+ 		context = cancellation->context;
+ 	} else {
+@@ -784,8 +802,8 @@ connection_handle_close (DaemonConnectio
+ 	}
+ 
+ 	gnome_vfs_daemon_set_current_connection (conn->conn);
+-	result = gnome_vfs_close_cancellable (handle->vfs_handle,
+-					      context);
++	result = gnome_vfs_close_cancellable_unchecked (handle->vfs_handle,
++							context);
+ 	gnome_vfs_daemon_set_current_connection (NULL);
+ 
+ 	/* Clear the handle so we don't close it twice. If close is not
+@@ -799,6 +817,10 @@ connection_handle_close (DaemonConnectio
+ 		connection_remove_cancellation (conn, cancellation);
+ 	}
+ 
++	if (directly_cancelled) {
++		gnome_vfs_context_free (context);
++	}
++	
+ 	if (connection_check_and_reply_error (conn, message, result)) {
+ 		return;
+ 	}

@@ -1,6 +1,9 @@
-osso-gnome-vfs2 (2.16.3-1osso37~unreleased) unstable; urgency=low
+osso-gnome-vfs2 (2.16.3-1osso37) unstable; urgency=low
 
-  * 
+  * Really add the 46-xfer-cancellable.patch and
+    47-daemon-check-directly-closed.patch files.  They were missing from
+    the 2.16.3-1osso36 source package due to some stupid svn merge
+    behavior.  Stupid, stupid svn merge.  I am not to blame at all.
 
  -- Marius Vollmer <marius.vollmer@nokia.com>  Tue, 12 Feb 2008 15:10:40 +0200
 

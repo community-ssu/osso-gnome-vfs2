@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-1osso38~unreleased) unstable; urgency=low
+
+  * 
+
+ -- Marius Vollmer <marius.vollmer@nokia.com>  Wed, 05 Mar 2008 14:16:15 +0200
+
 osso-gnome-vfs2 (2.16.3-1osso37) unstable; urgency=low
 
   * Really add the 46-xfer-cancellable.patch and

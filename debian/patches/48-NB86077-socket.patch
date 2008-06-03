@@ -1,0 +1,24 @@
+Index: imported/neon/ne_request.c
+===================================================================
+--- imported/neon/ne_request.c	(revision 15617)
++++ imported/neon/ne_request.c	(working copy)
+@@ -866,6 +866,9 @@ ssize_t ne_read_response_block(ne_reques
+     size_t readlen = buflen;
+     struct ne_response *const resp = &req->resp;
+ 
++    if (req->session->socket == NULL)
++            return -1;
++
+     if (read_response_block(req, resp, buffer, &readlen))
+ 	return -1;
+ 
+@@ -1543,7 +1546,8 @@ static int open_connection(ne_request *r
+     ne_session *sess = req->session;
+     int ret;
+     
+-    if (sess->connected) return NE_OK;
++    if (sess->connected && sess->socket) return NE_OK;
++    sess->connected = 0;
+ 
+     if (!sess->use_proxy)
+ 	ret = do_connect(req, &sess->server, _("Could not connect to server"));

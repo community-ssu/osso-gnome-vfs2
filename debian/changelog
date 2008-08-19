@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-1osso39) unstable; urgency=low
+
+  * Fixes: NB#86843, xdg mime data structures get shut down and
+
+ -- Richard Hult <richard@imendio.com>  Tue, 19 Aug 2008 09:01:19 +0200
+
 osso-gnome-vfs2 (2.16.3-1osso38) unstable; urgency=low
 
   * Fixes: NB#86077, RSS reader keeps crashing - gnomevfs problem

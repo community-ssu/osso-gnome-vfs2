@@ -1,3 +1,10 @@
+osso-gnome-vfs2 (2.16.3-2osso1) unstable; urgency=low
+
+  * Fix build with deprecated G_GNUC_FUNCTION. Only disable deprecation
+    guards for the time being.
+
+ -- Richard Hult <richard@imendio.com>  Wed, 12 Nov 2008 13:26:00 +0100
+
 osso-gnome-vfs2 (2.16.3-1osso39) unstable; urgency=low
 
   * Fixes: NB#86843, xdg mime data structures get shut down and

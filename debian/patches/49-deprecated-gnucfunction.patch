@@ -1,0 +1,36 @@
+Index: modules/Makefile.am
+===================================================================
+--- modules/Makefile.am	(revision 15879)
++++ modules/Makefile.am	(working copy)
+@@ -18,7 +18,6 @@ INCLUDES =					\
+ 	-D_POSIX_PTHREAD_SEMANTICS		\
+ 	-D_REENTRANT				\
+ 	-DSSH_PROGRAM=\"$(SSH_PROGRAM)\"	\
+-	-DG_DISABLE_DEPRECATED			\
+ 	-DGNOME_VFS_PREFIX=\"$(prefix)\"	\
+ 	-DGNOME_VFS_DATADIR=\"$(datadir)\"	\
+ 	-DGNOME_VFS_LIBDIR=\"$(libdir)\"	\
+Index: libgnomevfs/Makefile.am
+===================================================================
+--- libgnomevfs/Makefile.am	(revision 15879)
++++ libgnomevfs/Makefile.am	(working copy)
+@@ -19,7 +19,6 @@ INCLUDES =					\
+ 	-D_LARGEFILE64_SOURCE                   \
+ 	-D_POSIX_PTHREAD_SEMANTICS		\
+ 	-D_REENTRANT				\
+-	-DG_DISABLE_DEPRECATED			\
+ 	-DGNOME_VFS_PREFIX=\"$(prefix)\"	\
+ 	-DGNOME_VFS_BINDIR=\"$(bindir)\"	\
+ 	-DGNOME_VFS_DATADIR=\"$(datadir)\"	\
+Index: daemon/Makefile.am
+===================================================================
+--- daemon/Makefile.am	(revision 15879)
++++ daemon/Makefile.am	(working copy)
+@@ -8,7 +8,6 @@ INCLUDES= \
+ 	-D_LARGEFILE64_SOURCE                   \
+ 	-D_POSIX_PTHREAD_SEMANTICS		\
+ 	-D_REENTRANT				\
+-	-DG_DISABLE_DEPRECATED			\
+ 	-DGNOME_VFS_PREFIX=\"$(prefix)\"	\
+ 	-DGNOME_VFS_DATADIR=\"$(datadir)\"	\
+ 	-DGNOME_VFS_LIBDIR=\"$(libdir)\"	\

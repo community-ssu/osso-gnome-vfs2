@@ -1,0 +1,14 @@
+Index: modules/ftp-method.c
+===================================================================
+--- modules/ftp-method.c	(revision 15879)
++++ modules/ftp-method.c	(arbetskopia)
+@@ -2664,7 +2664,8 @@ do_read_directory (GnomeVFSMethod *metho
+ 		file_info->valid_fields &= ~GNOME_VFS_FILE_INFO_FIELDS_PERMISSIONS;
+ 
+ 		if (handle->file_info_options & GNOME_VFS_FILE_INFO_FOLLOW_LINKS &&
+-		    file_info->type == GNOME_VFS_FILE_TYPE_SYMBOLIC_LINK) {
++		    file_info->type == GNOME_VFS_FILE_TYPE_SYMBOLIC_LINK &&
++                    file_info->symlink_name != NULL) {
+ 			GnomeVFSURI *uri;
+ 			GnomeVFSFileInfo *symlink_info;
+ 			GnomeVFSResult res;

@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-2osso3) unstable; urgency=low
+
+  * Fixes: NB#106000, SIGSEGV in do_read_directory
+
+ -- Richard Hult <richard@imendio.com>  Thu,  2 Apr 2009 09:50:00 +0200
+
 osso-gnome-vfs2 (2.16.3-2osso2) unstable; urgency=low
 
   * No change in this version, just bump the version to get reuilt

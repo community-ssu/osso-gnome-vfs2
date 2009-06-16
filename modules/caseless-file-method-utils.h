@@ -21,12 +21,20 @@
 #ifndef __CASELESS_FILE_METHOD_UTILS_H__
 #define __CASELESS_FILE_METHOD_UTILS_H__
 
+#include <libgnomevfs/gnome-vfs.h>
+#include <dirent.h>
+
 gboolean     caseless_file_method_is_file_open         (const gchar       *filename);
 void         caseless_file_method_clear_cache          (void);
 GnomeVFSURI *caseless_file_method_create_unescaped_uri (const GnomeVFSURI *uri);
 gboolean     caseless_file_method_uri_equal            (gconstpointer      a,
 							gconstpointer      b);
 guint        caseless_file_method_uri_hash             (gconstpointer      p);
+
+
+struct dirent *caseless_file_method_allocate_dirent (void);
+const char *   caseless_file_method_readdir_wrapper (DIR           *dir,
+						     struct dirent *entry);
 
 #endif /* __CASELESS_FILE_METHOD_UTILS_H__ */
 

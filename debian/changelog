@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-2osso4) unstable; urgency=low
+
+  * Fixes: NB#122894, Readdir (g_dir_read_name) is used instead of readdir_r
+
+ -- Richard Hult <richard@imendio.com>  Fri, 19 Jun 2009 08:42:00 +0200
+
 osso-gnome-vfs2 (2.16.3-2osso3) unstable; urgency=low
 
   * Fixes: NB#106000, SIGSEGV in do_read_directory

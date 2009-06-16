@@ -18,12 +18,15 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "stdio.h"
-#include "string.h"
-
+#include <config.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <string.h>
 #include <glib.h>
 
 #include "osso_case_in.h"
+#include "caseless-file-method-utils.h"
+
 
 #define d(x) 
 
@@ -41,25 +44,23 @@ static gchar * get_cased_path            (const gchar *path);
 static gchar *
 get_file_system_real_part (const gchar *file, const gchar *directory)
 {
-	GDir        *dir;
-	GError      *error;
-	const gchar *r_file;
-	gchar       *file_case;
-	gchar       *ret_val;
+	DIR           *dir;
+	struct dirent *entry;
+	const gchar   *r_file;
+	gchar         *file_case;
+	gchar         *ret_val;
 
-	error = NULL;
-
-	dir = g_dir_open (directory, 0, &error);
+	dir = opendir (directory);
 	if (!dir) {
-		d(g_print ("%s\n", error->message));
-		g_error_free (error);
 		return NULL;
 	}
 
 	file_case = g_utf8_casefold (file, -1);
 	ret_val   = NULL;
 
-	while ((r_file = g_dir_read_name (dir)) != NULL) {
+	entry = caseless_file_method_allocate_dirent ();
+
+	while ((r_file = caseless_file_method_readdir_wrapper (dir, entry)) != NULL) {
 		gchar *r_file_utf8;
 		gchar *r_file_case;
 		
@@ -84,7 +85,8 @@ get_file_system_real_part (const gchar *file, const gchar *directory)
 	}
 	
 	g_free (file_case);
-	g_dir_close (dir);
+	g_free (entry);
+	closedir (dir);
 
 	return ret_val;
 }

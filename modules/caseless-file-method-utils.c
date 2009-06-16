@@ -19,6 +19,8 @@
  */
 
 #include <config.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include <glib.h>
 #include <libgnomevfs/gnome-vfs.h>
 #include <string.h>
@@ -36,15 +38,60 @@
 G_LOCK_DEFINE_STATIC (cache);
 static GHashTable *fds = NULL;
 
+#ifdef PATH_MAX
+#define	GET_PATH_MAX()	PATH_MAX
+#else
+static int
+GET_PATH_MAX (void)
+{
+	static unsigned int value;
+
+	/* This code is copied from GNU make.  It returns the maximum
+	   path length by using `pathconf'.  */
+
+	if (value == 0) {
+		long int x = pathconf(G_DIR_SEPARATOR_S, _PC_PATH_MAX);
+
+		if (x > 0)
+			value = x;
+		else
+			return MAXPATHLEN;
+	}
+
+	return value;
+}
+#endif
+
+struct dirent *
+caseless_file_method_allocate_dirent (void)
+{
+        return g_malloc (sizeof (struct dirent) + GET_PATH_MAX() + 1);
+}
+
+const char *
+caseless_file_method_readdir_wrapper (DIR *dir, struct dirent *entry)
+{
+        struct dirent *result = NULL;
+
+        if (readdir_r (dir, entry, &result) != 0) {
+                return NULL;
+        }
+
+        if (result == NULL) {
+                return NULL;
+        }
+
+        return entry->d_name;
+}
+
 static void
 get_pid_fds_foreach (const gchar *pid,
 		     GHashTable  *fds)
 {
-	gchar       *parent_dir;
-	GDir        *dir;
-	const gchar *entry;
-	gchar       *filename;
-	gchar       *filename_from_link;
+	gchar         *parent_dir;
+	DIR           *dir;
+	struct dirent *entry;
+        const gchar   *name;
 
 	parent_dir = g_build_path (G_DIR_SEPARATOR_S,
 				   G_DIR_SEPARATOR_S,
@@ -53,16 +100,19 @@ get_pid_fds_foreach (const gchar *pid,
 				   FD_DIR,
 				   NULL);
 
-	dir = g_dir_open (parent_dir, 0, NULL);
+	dir = opendir (parent_dir);
 	if (!dir) {
 		g_free (parent_dir);
 		return;
 	}
 
-	for (entry = g_dir_read_name (dir);
-	     entry != NULL;
-	     entry = g_dir_read_name (dir)) {
-		filename = g_build_filename (parent_dir, entry, NULL);
+        entry = caseless_file_method_allocate_dirent ();
+
+	while ((name = caseless_file_method_readdir_wrapper (dir, entry)) != NULL) {
+		gchar *filename;
+		gchar *filename_from_link;
+
+		filename = g_build_filename (parent_dir, name, NULL);
 		filename_from_link = g_file_read_link (filename, NULL);
 		g_free (filename);
 		
@@ -76,40 +126,43 @@ get_pid_fds_foreach (const gchar *pid,
 		}
 	}
 
-	g_dir_close (dir);
+	g_free (entry);
+	closedir (dir);
 	g_free (parent_dir);
 }
 
 static GSList *
 get_pid_dirs (void) 
 {
-	GSList      *dirs = NULL;
-	GDir        *dir;
-	const gchar *entry;
-	gchar       *parent_dir;
+	gchar         *parent_dir;
+	DIR           *dir;
+	struct dirent *entry;
+	GSList        *dirs = NULL;
+	const gchar   *name;
 
 	parent_dir = g_build_path (G_DIR_SEPARATOR_S,
 				   G_DIR_SEPARATOR_S, 
 				   PROC_DIR, 
 				   NULL);
 
-	dir = g_dir_open (parent_dir, 0, NULL);
+	dir = opendir (parent_dir);
 	g_return_val_if_fail (dir != NULL, NULL);
 
-	for (entry = g_dir_read_name (dir);
-	     entry != NULL;
-	     entry = g_dir_read_name (dir)) {
+	entry = caseless_file_method_allocate_dirent ();
+
+	while ((name = caseless_file_method_readdir_wrapper (dir, entry)) != NULL) {
 		/* We just do a simple check for the first character
 		 * to see if it is a digit since it is unlikely we get a
 		 * directory with <number><string> combination, and even
 		 * if we do, the extra lookup will not be noticed.
 		 */
-		if (g_ascii_isdigit (entry[0])) {
-			dirs = g_slist_append (dirs, g_strdup (entry));
+		if (g_ascii_isdigit (name[0])) {
+			dirs = g_slist_append (dirs, g_strdup (name));
 		}
 	}
 
-	g_dir_close (dir);
+	g_free (entry);
+	closedir (dir);
 	g_free (parent_dir);
 	
 	return dirs;

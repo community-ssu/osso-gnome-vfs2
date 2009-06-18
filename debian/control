@@ -2,7 +2,7 @@ Source: osso-gnome-vfs2
 Section: libs
 Priority: optional
 Maintainer: Kimmo Hämäläinen <kimmo.hamalainen@nokia.com>
-Build-Depends: debhelper (>= 4.0.0), libglib2.0-dev, cdbs, libgconf2-dev (>= 2.6.4), libxml2-dev, gettext, debhelper (>> 4.1.0), zlib1g-dev, intltool, gnome-common, gnome-pkg-tools, libdbus-glib-1-dev (>= 0.60), gtk-doc-tools, libsmbclient-dev, libhal-dev, libhal-storage-dev
+Build-Depends: debhelper (>= 4.0.0), libglib2.0-dev, cdbs, libgconf2-dev (>= 2.6.4), libxml2-dev, gettext, debhelper (>> 4.1.0), zlib1g-dev, intltool, gnome-common, gnome-pkg-tools, libdbus-glib-1-dev (>= 0.60), gtk-doc-tools, libhal-dev, libhal-storage-dev
 Standards-Version: 3.6.1.0
 
 Package: libosso-gnomevfs2-common
@@ -27,22 +27,6 @@ Section: devel
 Depends: libosso-gnomevfs2-common (= ${Source-Version})
 Description: Debug symbols for the libosso-gnomevfs2-common package
  This package is a patched version of gnome-vfs in GNOME2.
-
-Package: libosso-gnomevfs2-samba
-Section: devel
-Architecture: any
-Depends: ${shlibs:Depends}, libosso-gnomevfs2-common
-Description: The samba module for the GNOME virtual file-system
- This package contains the samba module for the GNOME virtual file system. It
- has been split out from the GNOME VFS package.
-
-Package: libosso-gnomevfs2-samba-dbg
-Architecture: any
-Section: devel
-Depends: libosso-gnomevfs2-samba (= ${Source-Version})
-Description: Debug symbols for the libosso-gnomevfs2-samba package
- This package contains debugging symbols for the samba module for the GNOME 
- virtual file system. It has been split out from the GNOME VFS package.
 
 Package: libosso-gnomevfs2-0
 Architecture: any

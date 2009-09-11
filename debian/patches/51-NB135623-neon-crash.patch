@@ -1,0 +1,51 @@
+From e632c4de3ba9c527e7b27b0a959450e6d9cfafed Mon Sep 17 00:00:00 2001
+From: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+Date: Thu, 10 Sep 2009 19:24:01 +0300
+Subject: [PATCH] neon: Parse scheme as described in rfc2396
+
+It's not enough for some URIs to find scheme by strstr(..., "://").
+rfc2396 section 3.1 describes scheme part.
+
+However new algorithm is not so restricted and allows capital letters in the
+scheme field. I doubt that the requirement to have only low-case letters is
+mandatory. If this really so there is too simple to add one condition like
+	(*p == tolower(*p))
+
+Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+---
+ imported/neon/ne_uri.c |   12 ++++++++++--
+ 1 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/imported/neon/ne_uri.c b/imported/neon/ne_uri.c
+index 3eb370e..e7a7460 100644
+--- a/imported/neon/ne_uri.c
++++ b/imported/neon/ne_uri.c
+@@ -81,7 +81,8 @@ unsigned int ne_uri_defaultport(const char *scheme)
+ /* TODO: not a proper URI parser */
+ int ne_uri_parse(const char *uri, ne_uri *parsed)
+ {
+-    const char *pnt, *slash, *colon, *atsign, *openbk;
++    const char *slash, *colon, *atsign, *openbk;
++    char *pnt = NULL, *p = uri;
+ 
+     parsed->port = 0;
+     parsed->host = NULL;
+@@ -93,7 +94,14 @@ int ne_uri_parse(const char *uri, ne_uri *parsed)
+ 	return -1;
+     }
+ 
+-    pnt = strstr(uri, "://");
++    /* Try to find scheme part as described in rfc2396 3.1 */
++    if (isalpha(*p++)) {
++	while (*p && (isalnum(*p) || *p == '+' || *p == '-' || *p == '.'))
++	    p++;
++	if (strncmp(p, "://", 3) == 0)
++	    pnt = p;
++    }
++
+     if (pnt) {
+ 	parsed->scheme = ne_strndup(uri, pnt - uri);
+ 	pnt += 3; /* start of hostport segment */
+-- 
+1.5.6.5
+

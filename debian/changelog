@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-2osso6) unstable; urgency=low
+
+  * Fixes: NB#135623, rss application crashed...
+
+ -- Richard Hult <richard@imendio.com>  Fri, 11 Sep 2009 09:51:00 +0200
+
 osso-gnome-vfs2 (2.16.3-2osso5) unstable; urgency=low
 
   * Remove samba package as it's not supported anymore

@@ -1,4 +1,4 @@
-2009-10-02  Kristian Rietveld  <kris@lanedo.com>
+2009-10-02  Christian Dywan  <christian@lanedo.com>
 
 	* libgnomevfs/gnome-vfs-mime-info-cache.c:
 	- Check if the cache folder exists, otherwise skip it

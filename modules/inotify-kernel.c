@@ -300,7 +300,8 @@ gint32 ik_watch (const char *path, guint32 mask, int *err)
    if (wd < 0)
    {
       int e = errno;
-      // FIXME: debug msg failed to add watch
+      if (g_getenv ("GNOME_VFS_INOTIFY_DEBUG"))
+          g_warning ("inotify_add_watch failed for '%s': %d", path, errno);
       if (err)
          *err = e;
       return wd;

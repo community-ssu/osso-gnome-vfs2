@@ -360,6 +360,10 @@ gnome_vfs_mime_info_cache_dir_new (const char *path)
 	dir = g_new0 (GnomeVFSMimeInfoCacheDir, 1);
 	dir->path = g_strdup (path);
 
+	if (!g_file_test (dir->path, G_FILE_TEST_EXISTS)) {
+		return NULL;
+	}
+
 	filename = g_build_filename (dir->path, "mimeinfo.cache", NULL);
 
 	gnome_vfs_monitor_add (&dir->cache_monitor_handle,

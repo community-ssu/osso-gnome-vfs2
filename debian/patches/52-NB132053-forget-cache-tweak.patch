@@ -1,0 +1,77 @@
+--- libgnomevfs/gnome-vfs-xfer.c
++++ libgnomevfs/gnome-vfs-xfer.c
+@@ -64,12 +64,6 @@ enum {
+ 	DEFAULT_SIZE_OVERHEAD = 1024
+ };
+ 
+-/* When the total copy size is over this limit, we try to
+- * forget the data cached for the files, in order to
+- * lower VM pressure
+- */
+-#define DROP_CACHE_SIZE_LIMIT (20*1024*1024)
+-
+ /* in asynch mode the progress callback does a context switch every time
+  * it gets called. We'll only call it every now and then to not loose a
+  * lot of performance
+@@ -1216,7 +1210,9 @@ copy_file_data (GnomeVFSHandle *target_handle,
+ 	gpointer buffer;
+ 	const char *write_buffer;
+ 	GnomeVFSFileSize total_bytes_read;
++	GnomeVFSFileOffset last_read_forgotten = 0;
+ 	gboolean forget_cache;
++	GnomeVFSFileSize forget_cache_counter = 0;
+ 	guint block_size;
+ 
+ 	*skip = FALSE;
+@@ -1229,9 +1225,6 @@ copy_file_data (GnomeVFSHandle *target_handle,
+ 	buffer = g_malloc (block_size);
+ 	total_bytes_read = 0;
+ 
+-	/* Enable streaming if the total size is large */
+-	forget_cache = progress->progress_info->bytes_total >= DROP_CACHE_SIZE_LIMIT;
+-	
+ 	do {
+ 		GnomeVFSFileSize bytes_read;
+ 		GnomeVFSFileSize bytes_to_write;
+@@ -1243,14 +1236,21 @@ copy_file_data (GnomeVFSHandle *target_handle,
+ 
+ 		progress->progress_info->phase = GNOME_VFS_XFER_PHASE_READSOURCE;
+ 
++		/* Enable streaming if the total size is large */
++		forget_cache = forget_cache_counter >= 1024*1024/2;
++		if (forget_cache)  {
++			forget_cache_counter = 0;
++		}
++
+ 		do {
+ 			retry = FALSE;
+ 
+ 			result = gnome_vfs_read_cancellable (source_handle, buffer,
+ 							     block_size, &bytes_read, context);
+ 			if (forget_cache) {
+-				gnome_vfs_forget_cache (source_handle,
+-							total_bytes_read, bytes_read);
++				gnome_vfs_forget_cache (source_handle, last_read_forgotten,
++							total_bytes_read + bytes_read - last_read_forgotten);
++				last_read_forgotten = total_bytes_read + bytes_read;
+ 			}
+ 			if (result != GNOME_VFS_OK && result != GNOME_VFS_ERROR_EOF)
+ 				retry = handle_error (&result, progress,
+@@ -1261,6 +1261,8 @@ copy_file_data (GnomeVFSHandle *target_handle,
+ 			break;
+ 		}
+ 
++		forget_cache_counter += bytes_read;
++
+ 		total_bytes_read += bytes_read;
+ 		bytes_to_write = bytes_read;
+ 
+@@ -1285,7 +1287,7 @@ copy_file_data (GnomeVFSHandle *target_handle,
+ 		
+ 		if (forget_cache && bytes_to_write == 0) {
+ 			gnome_vfs_forget_cache (target_handle,
+-						total_bytes_read - bytes_read, bytes_read);
++						0, total_bytes_read);
+ 		}
+ 
+ 		progress->progress_info->phase = GNOME_VFS_XFER_PHASE_COPYING;

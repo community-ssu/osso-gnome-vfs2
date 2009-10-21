@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-2osso8) unstable; urgency=low
+
+  * Fixes: NB#132053 Large file copy (SD->MMC) degrades system performance
+
+ -- Alban Crequy <alban.crequy@collabora.co.uk>  Wed, 21 Oct 2009 12:24:20 +0100
+
 osso-gnome-vfs2 (2.16.3-2osso7) unstable; urgency=low
 
   * Fixes: NB#141096 [AF-UT]Every 4 seconds polling for a mime info cache in

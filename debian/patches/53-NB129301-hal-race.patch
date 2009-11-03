@@ -1,0 +1,43 @@
+diff --git a/libgnomevfs/gnome-vfs-hal-mounts.c b/libgnomevfs/gnome-vfs-hal-mounts.c
+index 64eea52..92d0244 100644
+--- a/libgnomevfs/gnome-vfs-hal-mounts.c
++++ b/libgnomevfs/gnome-vfs-hal-mounts.c
+@@ -1634,7 +1634,6 @@ _gnome_vfs_hal_mounts_modify_volume (GnomeVFSVolumeMonitorDaemon *volume_monitor
+ 	GnomeVFSVolume *result;
+ 	LibHalContext *hal_ctx; 
+ 	LibHalDrive *hal_drive;
+-	LibHalVolume *hal_volume;
+ 	char path[PATH_MAX + 5] = "/dev/";
+ 	char *target = path + 5;
+ 	int ret;
+@@ -1655,17 +1654,16 @@ _gnome_vfs_hal_mounts_modify_volume (GnomeVFSVolumeMonitorDaemon *volume_monitor
+ 	 */
+ 	hal_drive = libhal_drive_from_device_file (hal_ctx, volume->priv->device_path);
+ 	if (hal_drive != NULL) {
+-		hal_volume = libhal_volume_from_device_file (hal_ctx, volume->priv->device_path);
+ 
+ 		/* handle drives that HAL can't poll and the user can still mount */
+-		if (hal_volume == NULL &&
+-		    libhal_device_get_property_bool (hal_ctx, 
++		if (libhal_device_get_property_bool (hal_ctx, 
+ 						     libhal_drive_get_udi (hal_drive),
+ 						     "storage.media_check_enabled",
+ 						     NULL) == FALSE) {
+ 			GnomeVFSDrive *drive;
+ 
+-			if ((drive = _gnome_vfs_volume_monitor_find_drive_by_hal_udi (
++			if (volume->priv->drive == NULL &&
++			    (drive = _gnome_vfs_volume_monitor_find_drive_by_hal_udi (
+ 				     GNOME_VFS_VOLUME_MONITOR (volume_monitor_daemon),
+ 				     libhal_drive_get_udi (hal_drive))) != NULL) {
+ 				volume->priv->drive = drive;
+@@ -1698,7 +1696,8 @@ _gnome_vfs_hal_mounts_modify_volume (GnomeVFSVolumeMonitorDaemon *volume_monitor
+ 						     NULL) == FALSE) {
+ 			GnomeVFSDrive *drive;
+ 
+-			if ((drive = _gnome_vfs_volume_monitor_find_drive_by_hal_udi (
++			if (volume->priv->drive == NULL &&
++			    (drive = _gnome_vfs_volume_monitor_find_drive_by_hal_udi (
+ 				     GNOME_VFS_VOLUME_MONITOR (volume_monitor_daemon),
+ 				     libhal_drive_get_udi (hal_drive))) != NULL) {
+ 				volume->priv->drive = drive;

@@ -2,6 +2,14 @@
 
 #export DH_VERBOSE=1
 
+# Don't install doc files
+DEB_INSTALL_DOCS_libosso-gnomevfs2-0 = --no-act
+DEB_INSTALL_CHANGELOGS_libosso-gnomevfs2-0 = --no-act
+DEB_INSTALL_MANPAGES_libosso-gnomevfs2-0 = --no-act
+DEB_INSTALL_DOCS_libosso-gnomevfs2-common = --no-act
+DEB_INSTALL_CHANGELOGS_libosso-gnomevfs2-common = --no-act
+DEB_INSTALL_MANPAGES_libosso-gnomevfs2-common = --no-act
+
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/autotools.mk
 include /usr/share/cdbs/1/class/gnome.mk

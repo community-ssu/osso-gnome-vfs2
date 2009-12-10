@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-2osso10) unstable; urgency=low
+
+  * Fixes: NB#149127 Remove doc files from package
+
+ -- Alban Crequy <alban.crequy@collabora.co.uk>  Thu, 10 Dec 2009 19:16:50 +0000
+
 osso-gnome-vfs2 (2.16.3-2osso9) unstable; urgency=low
 
   * Fixes: NB#129301 contents not refreshed upon insertion & removal of mmc

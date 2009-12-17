@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-2osso11) unstable; urgency=low
+
+  * Fixes: NB#139065 daemon subscribes to HAL D-Bus signals too broadly
+
+ -- Alban Crequy <alban.crequy@collabora.co.uk>  Thu, 17 Dec 2009 16:23:44 +0000
+
 osso-gnome-vfs2 (2.16.3-2osso10) unstable; urgency=low
 
   * Fixes: NB#149127 Remove doc files from package

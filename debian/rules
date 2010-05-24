@@ -39,6 +39,10 @@ ifneq (,$(findstring thumb,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -mthumb
 endif
 
+ifeq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -DG_DISABLE_CAST_CHECKS
+endif
+
 post-patches:: debian/stamp-autothings-update
 debian/stamp-autothings-update:
 	# Set ACLOCAL_FLAGS so that libtool.m4 is picked up in scratchbox 1.0.x + sardine

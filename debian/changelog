@@ -1,3 +1,10 @@
+osso-gnome-vfs2 (2.16.3-2osso12) unstable; urgency=low
+
+  * Compile with -DG_DISABLE_CAST_CHECKS by default
+  * Fixes: NB#162948 (gnomevfs2 recompilation with G_DISABLE_CAST_CHECKS)
+
+ -- Alberto Garcia <agarcia@igalia.com>  Mon, 24 May 2010 17:19:04 +0200
+
 osso-gnome-vfs2 (2.16.3-2osso11) unstable; urgency=low
 
   * Fixes: NB#139065 daemon subscribes to HAL D-Bus signals too broadly

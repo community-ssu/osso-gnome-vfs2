@@ -1,0 +1,123 @@
+--- osso-gnome-vfs2/libgnomevfs/gnome-vfs-hal-mounts.c	2012-04-09 23:27:26.186636910 +0100
++++ osso-gnome-vfs2.new/libgnomevfs/gnome-vfs-hal-mounts.c	2012-04-09 23:34:01.364631000 +0100
+@@ -315,6 +315,42 @@
+ 	}
+ }
+ 
++static int 
++get_mmc_volume_count (GnomeVFSVolumeMonitorDaemon *volume_monitor_daemon,
++			 char * drive_udi)
++{
++	char ** devices;
++	int num_devices,result,i;
++	char * fstype;
++
++	devices = libhal_manager_find_device_string_match(volume_monitor_daemon->hal_ctx,
++							  "info.parent",
++							  drive_udi,
++							  &num_devices,
++							  NULL);
++	result = num_devices;
++
++	if(num_devices<2) {
++		goto out;
++	}
++	for (i = 0; i < num_devices; i++) {
++		fstype = libhal_device_get_property_string (volume_monitor_daemon->hal_ctx,
++							    devices[i],
++							    "volume.fstype",
++							    NULL);
++		if(!fstype) {
++			result--;
++			continue;
++		}
++		if(strcmp(fstype,"swap") == 0) {
++			result--;
++		}
++		libhal_free_string (fstype);
++	}
++out:
++	libhal_free_string_array(devices);
++	return result;
++}
+ static char *
+ get_mmc_volume_label (GnomeVFSVolumeMonitorDaemon *volume_monitor_daemon,
+ 		      LibHalDrive *hal_drive)
+@@ -323,6 +359,10 @@
+ 	char *host_udi;
+ 	char *slot_name;
+ 	char *name;
++	int volume_count;
++
++	volume_count = get_mmc_volume_count(volume_monitor_daemon,
++					       libhal_drive_get_udi (hal_drive));
+ 
+ 	parent_udi = libhal_device_get_property_string (volume_monitor_daemon->hal_ctx,
+ 							libhal_drive_get_udi (hal_drive),
+@@ -340,7 +380,7 @@
+ 	if (!host_udi) {
+ 		return NULL;
+ 	}
+-
++	
+ 	slot_name = libhal_device_get_property_string (volume_monitor_daemon->hal_ctx,
+ 						       host_udi,
+ 						       "mmc_host.slot_name",
+@@ -349,8 +389,14 @@
+ 	if (!slot_name) {
+ 		return NULL;
+ 	}
++
++	if ((strcmp (slot_name, "external") == 0) && (volume_count > 1)) {
++		name = NULL;
++		goto out;
++	}
+ 	
+ 	name = _gnome_vfs_filesystem_get_label_for_slot_name (slot_name);
++out:
+ 	libhal_free_string (slot_name);
+ 	
+ 	return name;
+--- osso-gnome-vfs2/libgnomevfs/gnome-vfs-filesystem-type.c	2012-04-09 23:27:25.514842547 +0100
++++ osso-gnome-vfs2.new/libgnomevfs/gnome-vfs-filesystem-type.c	2012-04-09 22:49:41.787827000 +0100
+@@ -231,16 +231,16 @@
+ 	}
+ 
+ 	mmc_mount = g_getenv ("MMC_MOUNTPOINT");
+-	if (mmc_mount && g_str_has_prefix (mount_point, mmc_mount)) {
++	if (mmc_mount && (strcmp (mount_point, mmc_mount) == 0 )) {
+ 		return get_mmc_name (FALSE);
+ 	}
+ 
+-       mmc_mount = g_getenv ("INTERNAL_MMC_MOUNTPOINT");
+-       if (mmc_mount && g_str_has_prefix (mount_point, mmc_mount)) {
+-               return get_mmc_name (TRUE);
+-       }
++	mmc_mount = g_getenv ("INTERNAL_MMC_MOUNTPOINT");
++	if (mmc_mount && (strcmp (mount_point, mmc_mount) == 0 )) {
++		return get_mmc_name (TRUE);
++	}
+ 
+-       return NULL;
++	return NULL;
+ }
+ 
+ char *
+@@ -249,7 +249,7 @@
+ 	if (!slot_name) {
+ 		return NULL;
+ 	}
+-	
++
+ 	if (strcmp (slot_name, "external") == 0) {
+ 		return get_mmc_name (FALSE);
+ 	}
+@@ -257,7 +257,7 @@
+ 	if (strcmp (slot_name, "internal") == 0) {
+ 		return get_mmc_name (TRUE);
+ 	}
+-	
++
+ 	return NULL;
+ }
+ /* End of maemo patch */

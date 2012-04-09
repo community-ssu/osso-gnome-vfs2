@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-2osso12+0m5+0cssu0) unstable; urgency=low
+
+  * Use correct volume labels when external SD card has multiple volumes
+
+ -- Ivaylo Dimitrov <freemangordon@abv.bg>  Tue, 10 Apr 2012 01:42:37 +0300
+
 osso-gnome-vfs2 (2.16.3-2osso12+0m5) unstable; urgency=low
 
   * This entry has been added by BIFH queue processor

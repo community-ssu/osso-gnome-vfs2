@@ -1,3 +1,10 @@
+osso-gnome-vfs2 (2.16.3-2osso12+0m5) unstable; urgency=low
+
+  * This entry has been added by BIFH queue processor
+    version has been changed to 2.16.3-2osso12+0m5
+
+ -- Gary Birkett <ext-gary.2.birkett@nokia.com>  Wed, 26 May 2010 10:42:44 +0300
+
 osso-gnome-vfs2 (2.16.3-2osso12) unstable; urgency=low
 
   * Compile with -DG_DISABLE_CAST_CHECKS by default

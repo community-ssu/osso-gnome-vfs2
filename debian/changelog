@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-2osso12+0m5+0cssu1-thumb0) unstable; urgency=low
+
+  * Thumb2 compiled
+
+ -- Ivaylo Dimitrov <freemangordon@abv.bg>  Tue, 15 Jun 2012 16:38:12 +0300
+
 osso-gnome-vfs2 (2.16.3-2osso12+0m5+0cssu1) unstable; urgency=low
 
   * Fix gnome-vfs-daemon crash(assert failure) when mounting a partition on a

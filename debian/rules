@@ -34,6 +34,7 @@ DEB_DH_INSTALL_ARGS := -Xlibnntp -Xlibcomputer -Xlibfile
 
 DEB_DH_MAKESHLIBS_ARGS_libosso-gnomevfs2-common := --no-act
 
+CFLAGS += -fgnu89-inline
 # Use soft-float and thumb mode if it enabled.
 ifneq (,$(findstring thumb,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -mthumb

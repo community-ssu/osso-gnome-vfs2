@@ -10,7 +10,7 @@ Section: devel
 Architecture: any
 Depends: ${shlibs:Depends}, shared-mime-info, gconf2 (>= 2.6.0)
 Conflicts: gnome-vfs-extras2, gnome-vfs-sftp, libgnomevfs2-common
-Replaces: libgnomevfs2-dev (<< 2.6.0), libgnome2-common (<< 2.6.0), gnome-vfs-extras2, gnome-vfs-sftp, libgnomevfs2-common
+Replaces: libgnomevfs2-dev (<< 2.6.0), libgnome2-common (<< 2.6.0), gnome-vfs-extras2, gnome-vfs-sftp, libgnomevfs2-common, kernel-feature-errata-430973-workaround
 Provides: libgnomevfs2-common
 Description: The GNOME virtual file-system library common files (for GNOME2)
  GNOME VFS is the GNOME virtual file system. It is the foundation of the
@@ -30,7 +30,7 @@ Description: Debug symbols for the libosso-gnomevfs2-common package
 
 Package: libosso-gnomevfs2-0
 Architecture: any
-Depends: ${shlibs:Depends}, libosso-gnomevfs2-common (>= ${Source-Version})
+Depends: ${shlibs:Depends}, libosso-gnomevfs2-common (>= ${Source-Version}), kernel-feature-errata-430973-workaround
 Replaces: libgnomevfs2-0
 Conflicts: libgnomevfs2-0
 Provides: libgnomevfs2-0

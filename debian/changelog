@@ -1,3 +1,9 @@
+osso-gnome-vfs2 (2.16.3-2osso12+0m5+0cssu1.1) unstable; urgency=low
+
+  * Raised version number
+
+ -- Mohammad Abu-Garbeyyeh <mohammad7410@gmail.com>  Tue, 17 Jul 2012 23:48:40 +0300
+
 osso-gnome-vfs2 (2.16.3-2osso12+0m5+0cssu1) unstable; urgency=low
 
   * Fix gnome-vfs-daemon crash(assert failure) when mounting a partition on a

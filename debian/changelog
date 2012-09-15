@@ -1,4 +1,4 @@
-osso-gnome-vfs2 (2.16.3-2osso12+0m5+0cssu1-thumb1) unstable; urgency=low
+osso-gnome-vfs2 (2.16.3-2osso12+0m5+0cssu1.1+thumb1) unstable; urgency=low
 
   * add kernel errata dependency
 
